@@ -82,6 +82,7 @@ node {
 			sh "ls -la ${pwd()}"
 			sh "ls -la ."
 			sh "pwd"
+			BUILD_ID='dontKillMe'
 			retVal=sh(returnStatus: true,script:"sh ./gradlew deploy")
 			echo "Build returned ${retVal.toString()}"
 			if (retVal!=0)
@@ -108,7 +109,7 @@ node {
 				echo rsyncCommand
 
 
-				sshRestartCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${port}/restart.sh ${serverPort} ${logDir}"
+				sshRestartCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/restart.sh ${serverPort} ${logDir}"
 				echo sshRestartCommand
 
 				try{
