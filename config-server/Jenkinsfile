@@ -82,8 +82,7 @@ node {
 			sh "ls -la ${pwd()}"
 			sh "ls -la ."
 			sh "pwd"
-			BUILD_ID='dontKillMe'
-			retVal=sh(returnStatus: true,script:"sh ./gradlew deploy")
+			retVal=sh(returnStatus: true,script:"BUILD_ID=dontKillMe sh ./gradlew deploy")
 			echo "Build returned ${retVal.toString()}"
 			if (retVal!=0)
 			{
