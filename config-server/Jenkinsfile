@@ -1,0 +1,134 @@
+node {
+	//todo - Store port to Device type in map, after all bugs are fixed. 
+	def serverPort;
+	def remoteHost
+	def remoteUser
+	def baseDir
+	def branch
+	def logDir
+
+		stage ('Parse Params'){
+			echo this.params.toString()
+		
+			if (this.params.server_port!=null)
+			{
+				serverPort=this.params.server_port
+			}
+			else
+			{
+				error ('server_port is null')
+			}
+			if (this.params.server_hostname!=null)
+			{
+				remoteHost=this.params.server_hostname
+			}
+			else
+			{
+				error ('server_hostname is null')
+			}
+
+			if (this.params.remote_user!=null)
+			{
+				remoteUser=this.params.remote_user
+			}
+			else
+			{
+				error ('remoteUser is null')
+			}
+
+
+			if (this.params.base_dir!=null)
+			{
+				baseDir=this.params.base_dir
+			}
+			else
+			{
+				error ('base_dir is null')
+			}
+			
+			if (this.params.log_dir!=null)
+			{
+				logDir=this.params.log_dir
+			}					
+			else
+			{
+				error ('log_dir is not specified')	
+			}
+			
+			if (this.params.branch!=null)
+			{
+				branch=this.params.branch
+			}					
+			else
+			{
+				error ('branch is not specified')	
+			}
+
+
+
+		}
+
+
+	stage ('Checkout'){
+
+		checkout([$class: 'GitSCM',
+				branches: [[name: branch]],
+				userRemoteConfigs: [[credentialsId: 'deployjava',
+			       	url: 'git@gitlab.com:axestrack_bankend/config-server.git']]])
+	}
+
+	stage ('Build'){
+		echo "Building config server..."
+			sh "ls -la ${pwd()}"
+			sh "ls -la ."
+			sh "pwd"
+			retVal=sh(returnStatus: true,script:"sh ./gradlew deploy")
+			echo "Build returned ${retVal.toString()}"
+			if (retVal!=0)
+			{
+				error("Build failed with return value ${retVal.toString()}") 
+			}	
+		echo "Finished building...."
+
+	}
+	stage('SSH transfer and restart') {
+
+	
+
+
+
+				mkdirCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} mkdir -p ${baseDir}"
+				echo mkdirCommand
+
+				sshLsCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} ls -l ${baseDir}"
+				echo sshLsCommand
+				
+
+				rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress build/libs/ ${remoteUser}@${remoteHost}:${baseDir}"
+				echo rsyncCommand
+
+
+				sshRestartCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${port}/restart.sh ${serverPort} ${logDir}"
+				echo sshRestartCommand
+
+				try{
+					sshagent(credentials : ['deployjava']) {	
+						//todo add checks for return values here
+						//make directory if it doesnt exist
+						sh mkdirCommand
+							//This is a test command
+							sh sshLsCommand
+							//This is the actual copy command
+							sh rsyncCommand
+							//This command starts the server. 
+							sh sshRestartCommand
+					}
+				}
+				catch(err)
+				{
+					echo "This is a false alarm, because we're waiting 30 secs to see the logs... We're using this workaround until we figure out how to set timeout for "
+					echo err.getMessage()
+				}
+		
+	}
+}
