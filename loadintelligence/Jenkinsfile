@@ -6,7 +6,6 @@ node {
 		def baseDir
 		def protocol 
 		def branch
-		def checkoutNeeded=true;
 		stage ('Parse Params'){
 			echo this.params.toString()
 				if(this.params.server_port !=null)
@@ -76,22 +75,15 @@ node {
 			{
 				error ('branch is not specified')	
 			}
-			if(this.params.checkoutNeeded!=nbull)
-			{
-				checkoutNeeded=this.params.checkoutNeeded;
-			}
 		}
 
 
 	stage ('Checkout'){
-		if(checkoutNeeded)
-		{
 
 		checkout([$class: 'GitSCM',
 				branches: [[name: branch]],
 				userRemoteConfigs: [[credentialsId: 'deployjava',
 			       	url: 'git@gitlab.com:axestrack_bankend/java-listener.git']]])
-		}
 	}
 
 	stage ('Build'){
@@ -132,6 +124,7 @@ node {
 				echo rsyncCommand
 
 
+				//protocol = 'gt'
 				serverPort=port + 6000
 
 				sshRestartCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${port}/production_restart.sh ${port} ${serverPort} ${protocol}"
