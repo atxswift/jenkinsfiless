@@ -76,7 +76,7 @@ node {
 			{
 				error ('branch is not specified')	
 			}
-			if(this.params.checkoutNeeded!=nbull)
+			if(this.params.checkoutNeeded!=null)
 			{
 				checkoutNeeded=this.params.checkoutNeeded;
 			}
