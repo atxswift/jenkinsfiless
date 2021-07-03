@@ -7,7 +7,7 @@ node {
 		def protocol 
 		def branch
 		def checkoutNeeded=true;
-		def sizeoflogfile
+		def sizeoflogfiles
 		def numberoflogfiles
 		def logRoot
 		stage ('Parse Params'){
@@ -95,11 +95,11 @@ node {
 				error ('number_of_log_files is not specified')	
 			}
 
+                      
 
-
-			if(this.params.sizeoflogfile!=null)
+			if(this.params.sizeoflogfiles!=null)
 			{
-				sizeoflogfile=this.params.size_of_log_files				
+				sizeoflogfiles=this.params.size_of_log_files				
 			}
 
 			else
@@ -173,7 +173,7 @@ node {
 
 				serverPort=port + 6000
 
-				sshRestartCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${port}/production_restart.sh ${port} ${serverPort} ${protocol} ${sizeoflogfile} ${numberoflogfiles} ${logRoot}"
+				sshRestartCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${port}/production_restart.sh ${port} ${serverPort} ${protocol} ${sizeoflogfiles} ${numberoflogfiles} ${logRoot}"
 
 				echo sshRestartCommand
 
