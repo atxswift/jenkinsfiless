@@ -9,7 +9,9 @@ node{
 	def numberoflogfiles
 	def logRoot
 	stage ('Parse Params')
-	{			
+	{
+                        echo this.params.toString()
+
 		
 		if (this.params.branch!=null)
                         {
