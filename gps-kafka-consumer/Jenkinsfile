@@ -1,16 +1,34 @@
 node{
 	//todo - Store port to Device type in map, after all bugs are fixed. 
-	def listenerPorts=[];
 	def remoteHost
-		def remoteUser
-		def baseDir
-		def branch
-		def checkoutNeeded=true;
-		def sizeoflogfiles
-		def numberoflogfiles
-		def logRoot
-			
+	def remoteUser
+	def baseDir
+	def branch
+	def checkoutNeeded=true;
+	def sizeoflogfiles
+	def numberoflogfiles
+	def logRoot
+	stage ('Parse Params')
+	{			
+		
+		if (this.params.branch!=null)
+                        {
+                                branch=this.params.branch
+                        }
+                        else
+                        {
+                                error ('branch is not specified')
+                        }
 
+		  if(this.params.checkoutNeeded!=null)
+                        {
+                                checkoutNeeded=this.params.checkoutNeeded;
+                        }
+
+		
+		
+		
+	}
 
 	stage ('Checkout'){
 		if(checkoutNeeded)
@@ -41,7 +59,7 @@ node{
 	}
 	stage('SSH transfer and restart') {
 
-	
+
 	}
 }
 
