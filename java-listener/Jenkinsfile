@@ -97,7 +97,7 @@ node {
 
                       
 
-			if(this.params.sizeoflogfiles!=null)
+			if(this.params.size_of_log_files!=null)
 			{
 				sizeoflogfiles=this.params.size_of_log_files				
 			}
