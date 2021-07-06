@@ -1,4 +1,4 @@
-node{
+ode{
 	//todo - Store port to Device type in map, after all bugs are fixed. 
 	def remoteHost
 	def remoteUser
@@ -37,7 +37,7 @@ node{
 		{
 
 			checkout([$class: 'GitSCM',
-					branches: [[name: branch]],
+					branches: [[name: '*/master']],
 					userRemoteConfigs: [[credentialsId: 'deployjava',
 					url: 'git@gitlab.com:axestrack_bankend/gps-kafka-consumer.git']]])
 		}
