@@ -48,14 +48,12 @@ node{
 			sh "ls -la ${pwd()}"
 			sh "ls -la ."
 			sh "pwd"
-			//buildFolder="${WORKSPACE}@script"
-			//	buildfolder="."
-		//	retVal=sh(returnStatus: true,script:"sh ./build.sh")
-		//	echo "Build returned ${retVal.toString()}"
-		//	if (retVal!=0)
-		//	{
-		//		error("Build failed with return value ${retVal.toString()}") 
-		//	}	
+			retVal=sh(returnStatus: true,script:"sh ./build.sh")
+			echo "Build returned ${retVal.toString()}"
+			if (retVal!=0)
+			{
+				error("Build failed with return value ${retVal.toString()}") 
+			}	
 		echo "Finished building...."
 
 	}
