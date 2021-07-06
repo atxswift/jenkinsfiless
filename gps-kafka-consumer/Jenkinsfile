@@ -36,10 +36,7 @@ node{
 		if(checkoutNeeded)
 		{
 
-			//checkout([$class: 'GitSCM',
-			//		branches: [[name: branch]],
-			//		userRemoteConfigs: [[credentialsId: 'deployjava',
-			//		url: 'git@gitlab.com:axestrack_bankend/gps-kafka-consumer.git']]])
+			checkout([$class: 'GitSCM',branches: [[name: branch]],userRemoteConfigs: [[credentialsId: 'deployjava', url: 'git@gitlab.com:axestrack_bankend/gps-kafka-consumer.git']]])
 		}
 	}
 
