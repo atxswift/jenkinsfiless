@@ -36,10 +36,10 @@ node{
 		if(checkoutNeeded)
 		{
 
-			checkout([$class: 'GitSCM',
-					branches: [[name:'refs/remotes/origin/master']],
-					userRemoteConfigs: [[credentialsId: 'deployjava',
-					url: 'git@gitlab.com:axestrack_bankend/gps-kafka-consumer.git']]])
+			//checkout([$class: 'GitSCM',
+			//		branches: [[name: branch]],
+			//		userRemoteConfigs: [[credentialsId: 'deployjava',
+			//		url: 'git@gitlab.com:axestrack_bankend/gps-kafka-consumer.git']]])
 		}
 	}
 
@@ -50,12 +50,12 @@ node{
 			sh "pwd"
 			//buildFolder="${WORKSPACE}@script"
 			//	buildfolder="."
-			retVal=sh(returnStatus: true,script:"sh ./build.sh")
-			echo "Build returned ${retVal.toString()}"
-			if (retVal!=0)
-			{
-				error("Build failed with return value ${retVal.toString()}") 
-			}	
+		//	retVal=sh(returnStatus: true,script:"sh ./build.sh")
+		//	echo "Build returned ${retVal.toString()}"
+		//	if (retVal!=0)
+		//	{
+		//		error("Build failed with return value ${retVal.toString()}") 
+		//	}	
 		echo "Finished building...."
 
 	}
