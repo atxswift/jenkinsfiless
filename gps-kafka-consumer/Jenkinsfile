@@ -1,12 +1,12 @@
 node{
 	//todo - Store port to Device type in map, after all bugs are fixed. 
 	
-	def stringParams=['remoteHost','remoteUser','baseDir','branch','projectName']
-	
+	def stringParams=['appName','branch','remoteUser','remoteHost','logRoot']
+	def intparams=['port','consumerNumber','sizeOfLogfiles','numberOfLogFiles']
 	//These are parameters whose values are integers, not necessarily which are integer params in jenkins 
-	def intParams=['port']
-	def csvintParameters=['consumerNumbers']
+
 	def boolParams=['checkoutneeded']
+	
 	def paramsMap=[:] 
 
 
