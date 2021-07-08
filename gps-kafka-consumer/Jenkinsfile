@@ -14,7 +14,7 @@ node{
 	{
                    echo this.params.toString()
 		echo this.params.getClass().toString()
-		this.params.each{key,val
+		this.params.each {key,val
 			echo key,value
 		}
 	
