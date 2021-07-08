@@ -1,56 +1,46 @@
 node{
 	//todo - Store port to Device type in map, after all bugs are fixed. 
-	def remoteHost
-	def remoteUser
-	def baseDir
-	def branch
-	def checkoutNeeded=true;
-	def sizeoflogfiles
-	def numberoflogfiles
-	def logRoot
+	
+	def stringParams=['remoteHost','remoteUser','baseDir','branch','projectName']
+	
+	//These are parameters whose values are integers, not necessarily which are integer params in jenkins 
+	def intParams=['port']
+	def csvintParameters=['consumerNumbers']
+	def boolParams=['checkoutneeded']
+	def paramsMap=[:] 
+
+
 	stage ('Parse Params')
 	{
-                        echo this.params.toString()
-
-		
-		if (this.params.branch!=null)
-                        {
-                                branch=this.params.branch
-                        }
-                        else
-                        {
-                                error ('branch is not specified')
-                        }
-
-		  if(this.params.checkoutNeeded!=null)
-                        {
-                                checkoutNeeded=this.params.checkoutNeeded;
-                        }
-
-		
+                   echo this.params.toString()
+		echo this.params.getClass()
+	
 		
 		
 	}
 
 	stage ('Checkout'){
-		if(checkoutNeeded)
-		{
 
-			checkout([$class: 'GitSCM',branches: [[name: branch]],userRemoteConfigs: [[credentialsId: 'deployjava', url: 'git@gitlab.com:axestrack_bankend/gps-kafka-consumer.git']]])
-		}
+		//if(checkoutNeeded)
+		//{
+
+//			checkout([$class: 'GitSCM',branches: [[name: branch]],userRemoteConfigs: [[credentialsId: 'deployjava', url: 'git@gitlab.com:axestrack_bankend/gps-kafka-consumer.git']]])
+//		}
 	}
 
 	stage ('Build'){
-		echo "Building listener..."
-			sh "ls -la ${pwd()}"
-			sh "ls -la ."
-			sh "pwd"
-			retVal=sh(returnStatus: true,script:"sh ./build.sh")
-			echo "Build returned ${retVal.toString()}"
-			if (retVal!=0)
-			{
-				error("Build failed with return value ${retVal.toString()}") 
-			}	
+		
+		echo "Building consumer..."
+		sh "ls -la ${pwd()}"
+		sh "ls -la ."
+		sh "pwd"
+
+	//	retVal=sh(returnStatus: true,script:"sh ./build.sh")
+	//		echo "Build returned ${retVal.toString()}"
+	//		if (retVal!=0)
+	//		{
+	//			error("Build failed with return value ${retVal.toString()}") 
+	//		}	
 		echo "Finished building...."
 
 	}
