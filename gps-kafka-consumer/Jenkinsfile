@@ -13,7 +13,7 @@ node{
 	stage ('Parse Params')
 	{
                    echo this.params.toString()
-		echo this.params.getClass()
+		echo this.params.getClass().toString()
 	
 		
 		
