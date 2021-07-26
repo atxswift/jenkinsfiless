@@ -1,8 +1,8 @@
 node{
 	//todo - Store port to Device type in map, after all bugs are fixed. 
 
-	def stringParams=['appName','branch','remoteUser','remoteHost','logRoot','baseDir','profile']
-		def intParams=['port','consumerNumber','sizeOfLogFiles','numberOfLogFiles','redisPort']
+	def stringParams=['appName','branch','remoteUser','remoteHost','logRoot','baseDir','profile','loglevel']
+		def intParams=['port','sizeOfLogFiles','numberOfLogFiles']
 		//These are parameters whose values are integers, not necessarily which are integer params in jenkins 
 
 		def boolParams=['checkoutNeeded']
@@ -82,22 +82,21 @@ node{
 	stage('SSH transfer and restart') {
 		remoteUser=paramsMap.get('remoteUser')
 			remoteHost=paramsMap.get('remoteHost')
-			baseDir=paramsMap.get('baseDir')
-			consumerNumber=paramsMap.get('consumerNumber');
+			baseDir=paramsMap.get('baseDir');
 
-		sshLsCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} ls -l ${baseDir}/${consumerNumber}"
+		sshLsCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} ls -l ${baseDir}"
 
 			echo sshLsCommand
 
-			mkdirCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} mkdir -p ${baseDir}/${consumerNumber}"
+			mkdirCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} mkdir -p ${baseDir}"
 			echo mkdirCommand
 
 
 
-			rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress build/libs/ ${remoteUser}@${remoteHost}:${baseDir}/${consumerNumber}"
+			rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress build/libs/ ${remoteUser}@${remoteHost}:${baseDir}"
 			echo rsyncCommand
 
-			sshRestartCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${consumerNumber}/production_restart.sh ${consumerNumber} ${paramsMap.get('port')} ${paramsMap.get('redisPort')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('logRoot')}"
+			sshRestartCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/production_restart.sh ${paramsMap.get('port')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('loglevel')} ${paramsMap.get('logRoot') }"
 			echo sshRestartCommand
 
 
