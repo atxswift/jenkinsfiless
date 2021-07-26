@@ -129,7 +129,7 @@ node {
 			checkout([$class: 'GitSCM',
 					branches: [[name: branch]],
 					userRemoteConfigs: [[credentialsId: 'deployjava',
-					url: 'git@gitlab.com:axestrack_bankend/java-listener.git']]])
+					url: 'git@gitlab.com:axestrack_bankend/kafka_producer_microservice.git']]])
 		}
 	}
 
