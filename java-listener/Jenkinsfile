@@ -2,10 +2,11 @@ node {
 	//todo - Store port to Device type in map, after all bugs are fixed. 
 	def listenerPorts=[];
 	def remoteHost
+	 def paramsMap=[:]
 
 		def stringParams=['appName','branch','remoteUser','remoteHost','profile','logLevel','logRoot','listenerPorts']
-		def intparams=['sizeOfLogfiles','numberOfLogFiles']
-		def boolParams=['checkoutneeded']
+		def intParams=['sizeOfLogFiles','numberOfLogFiles']
+		def boolParams=['checkoutNeeded']
 
 
 		stage ('Parse Params'){
@@ -42,7 +43,7 @@ node {
 			echo paramsMap.toString()
 			echo this.params.toString()
 
-			String[]  rawPorts=this.paramsMap.get('listenerPorts').split(',')
+			String[]  rawPorts=paramsMap.get('listenerPorts').split(',')
 			for (port in rawPorts)
 			{
 				if( port.trim().isInteger())
@@ -111,7 +112,7 @@ node {
 
 			serverPort=port + 6000
 
-			sshRestartCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${port}/production_restart.sh ${serverPort} paramsMap.get('profile') ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')}  ${paramsMap.get('logLevel')} ${port}  ${logRoot}"
+			sshRestartCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${port}/production_restart.sh ${serverPort} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')}  ${paramsMap.get('logLevel')} ${port}  ${logRoot}"
 
 			echo sshRestartCommand
 
@@ -119,7 +120,7 @@ node {
 				//todo add checks for return values here
 				//make directory if it doesnt exist
 				sh mkdirCommand
-			:	//This is a test command
+				//This is a test command
 				sh sshLsCommand
 				//This is the actual copy command
 				sh rsyncCommand
