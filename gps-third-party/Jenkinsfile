@@ -1,7 +1,7 @@
 node{
 	//todo - Store port to Device type in map, after all bugs are fixed. 
 
-	def stringParams=['appName','branch','remoteUser','remoteHost','logRoot','baseDir','profile','loglevel','instanceID']
+	def stringParams=['appName','branch','remoteUser','remoteHost','logRoot','profile','loglevel','instanceID']
 		def intParams=['port','sizeOfLogFiles','numberOfLogFiles']
 		//These are parameters whose values are integers, not necessarily which are integer params in jenkins 
 
@@ -82,7 +82,7 @@ node{
 	stage('SSH transfer and restart') {
 		remoteUser=paramsMap.get('remoteUser')
 			remoteHost=paramsMap.get('remoteHost')
-			baseDir=paramsMap.get('baseDir');
+			baseDir=paramsMap.get('appName');
 
 		sshLsCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} ls -l ${baseDir}"
 
@@ -130,4 +130,4 @@ node{
 
 
 }
-
+:

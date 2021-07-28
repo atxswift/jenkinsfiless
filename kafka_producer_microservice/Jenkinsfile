@@ -2,200 +2,121 @@ node {
 	//todo - Store port to Device type in map, after all bugs are fixed. 
 	def listenerPorts=[];
 	def remoteHost
-		def remoteUser
-		def baseDir
-		def protocol 
-		def branch
-		def checkoutNeeded=true;
-		def sizeoflogfiles
-		def numberoflogfiles
-		def logRoot
+	 def paramsMap=[:]
+
+		def stringParams=['appName','branch','remoteUser','remoteHost','profile','logLevel','logRoot','instanceID']
+		def intParams=['sizeOfLogFiles','numberOfLogFiles']
+		def boolParams=['checkoutNeeded']
+
+
 		stage ('Parse Params'){
+
 			echo this.params.toString()
-				if(this.params.server_port !=null)
-				{
-					print this.params.server_port
-						String[]  rawPorts=this.params.server_port.split(',')
-						for (port in rawPorts)
-						{
-							if( port.trim().isInteger())
-							{
-								listenerPorts.add(Integer.valueOf(port.trim()))
-							}
-							else
-							{
-								print 'found non-integer '+port.trim()+' in ports'
-									error ('found non-integer '+port.trim()+' in server_port' + 'aborting the build')
-							}
-						}
-					println listenerPorts
+			echo this.params.getClass().toString()
 
+			stringParams.each {key->
+				val=this.params.get(key)
+				if (val==null)
+					error('Got null value for '+key )
+					paramsMap.put(key,val.trim())
 				}
-				else
-				{
-					error ('server_port has not been specified')
+
+			intParams.each {key->
+				val=this.params.get(key)
+				if (val==null)
+					error('Got null value for '+key )
+					else if (!val.trim().isInteger())
+					{
+						error('Got non-integer value for '+key + ":"+val.trim() )
+					}
+					paramsMap.put(key,val.trim())
 				}
-			if (this.params.server_hostname!=null)
-			{
-				remoteHost=this.params.server_hostname
-			}
-			else
-			{
-				error ('server_hostname is null')
-			}
 
-			if (this.params.remote_user!=null)
-			{
-				remoteUser=this.params.remote_user
+			boolParams.each {key->
+				val=this.params.get(key)
+				if (val==null)
+					error('Got null value for '+key )
+				paramsMap.put(key,val.toBoolean())
 			}
-			else
-			{
-				error ('remoteUser is null')
-			}
-
-
-			if (this.params.base_dir!=null)
-			{
-				baseDir=this.params.base_dir
-			}
-			else
-			{
-				error ('base_dir is null')
-			}
-
-			if (this.params.protocol!=null)
-			{
-				protocol=this.params.protocol
-			}
-			else
-			{
-				protocol='gt'
-			}
-			if (this.params.branch!=null)
-			{
-				branch=this.params.branch
-			}					
-			else
-			{
-				error ('branch is not specified')	
-			}
-			if(this.params.checkoutNeeded!=null)
-			{
-				checkoutNeeded=this.params.checkoutNeeded;
-			}
-
-
-			if(this.params.number_of_log_files!=null)
-			{
-				numberoflogfiles=this.params.number_of_log_files				
-			}
-
-			else
-			{
-				error ('number_of_log_files is not specified')	
-			}
-
-                      
-
-			if(this.params.size_of_log_files!=null)
-			{
-				sizeoflogfiles=this.params.size_of_log_files				
-			}
-
-			else
-			{
-				error ('size_of_log_files is not specified')	
-			}
-
-
-			if(this.params.log_root!=null)
-			{
-				logRoot=this.params.log_root				
-			}
-
-			else
-			{
-				error ('log_root is not specified')	
-			}
-
-
+			echo paramsMap.toString()
+			echo this.params.toString()
 		}
 
 
 	stage ('Checkout'){
 		if(checkoutNeeded)
 		{
-
 			checkout([$class: 'GitSCM',
-					branches: [[name: branch]],
+					branches: [[name: paramsMap.get("branch")]],
 					userRemoteConfigs: [[credentialsId: 'deployjava',
-					url: 'git@gitlab.com:axestrack_bankend/kafka_producer_microservice.git']]])
+					url: 'git@gitlab.com:axestrack_bankend/java-listener.git']]])
 		}
 	}
 
 	stage ('Build'){
 		echo "Building listener..."
-			sh "ls -la ${pwd()}"
-			sh "ls -la ."
-			sh "pwd"
-			//buildFolder="${WORKSPACE}@script"
-			//	buildfolder="."
-			retVal=sh(returnStatus: true,script:"sh ./build.sh")
-			echo "Build returned ${retVal.toString()}"
-			if (retVal!=0)
-			{
-				error("Build failed with return value ${retVal.toString()}") 
-			}	
+		sh "ls -la ${pwd()}"
+		sh "ls -la ."
+		sh "pwd"
+		retVal=sh(returnStatus: true,script:"sh ./build.sh")
+		echo "Build returned ${retVal.toString()}"
+		if (retVal!=0)
+		{
+			error("Build failed with return value ${retVal.toString()}") 
+		}	
 		echo "Finished building...."
-
 	}
+	
 	stage('SSH transfer and restart') {
 
 		//Later, there will be a single location, with different params.
 		//Can use a flag for multiple or single copies. 
 		//Do this after bugs fixed. 
-		for (port in listenerPorts)
-		{
+		remoteUser=paramsMap.get('remoteUser')
+           	remoteHost=paramsMap.get('remoteHost')
+           	baseDir=paramsMap.get('appName')
+		profile=paramsMap.get('profile')
+		port=paramsMap.get('instanceID')
+
+		
+		
 
 			sshLsCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} ls -l ${baseDir}/${port}"
-				echo sshLsCommand
+			echo sshLsCommand
 
 
-				mkdirCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} mkdir -p ${baseDir}/${port}"
-				echo mkdirCommand
+			mkdirCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} mkdir -p ${baseDir}/${port}"
+			echo mkdirCommand
 
-				scpCopyCommand="scp -o StrictHostKeyChecking=no  -r build/libs ${remoteUser}@${remoteHost}:${baseDir}/${port}"
-				echo scpCopyCommand
-
-				rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress build/libs/ ${remoteUser}@${remoteHost}:${baseDir}/${port}"
-				echo rsyncCommand
+			rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress build/libs/ ${remoteUser}@${remoteHost}:${baseDir}/${port}"
+			echo rsyncCommand
 
 
-				serverPort=port + 6000
 
-				sshRestartCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${port}/production_restart.sh ${port} ${serverPort} ${protocol} ${sizeoflogfiles} ${numberoflogfiles} ${logRoot}"
+			sshRestartCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${port}/production_restart.sh ${serverPort} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')}  ${paramsMap.get('logLevel')} ${port}  ${logRoot}"
 
-				echo sshRestartCommand
+			echo sshRestartCommand
 
+			sshagent(credentials : ['deployjava']) {	
+				//todo add checks for return values here
+				//make directory if it doesnt exist
+				sh mkdirCommand
+				//This is a test command
+				sh sshLsCommand
+				//This is the actual copy command
+				sh rsyncCommand
+				//This command starts the server. 
+							
 				try{
-					sshagent(credentials : ['deployjava']) {	
-						//todo add checks for return values here
-						//make directory if it doesnt exist
-						sh mkdirCommand
-							//This is a test command
-							sh sshLsCommand
-							//This is the actual copy command
-							sh rsyncCommand
-							//This command starts the server. 
-							sh sshRestartCommand
-					}
+					sh sshRestartCommand
 				}
-			catch(err)
-			{
-				echo "This is a false alarm, because we're waiting 30 secs to see the logs... We're using this workaround until we figure out how to set timeout for "
+				catch(err)
+				{
+					echo "This is a false alarm, because we're waiting 30 secs to see the logs... We're using this workaround until we figure out how to set timeout for "
 					echo err.getMessage()
+				}
 			}
-		}
+		
 	}
 }
 
