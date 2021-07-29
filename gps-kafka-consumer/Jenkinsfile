@@ -1,8 +1,7 @@
 node{
-	//todo - Store port to Device type in map, after all bugs are fixed. 
 	
-	def stringParams=['appName','branch','remoteUser','remoteHost','logRoot','profile']
-	def intParams=['port','consumerNumber','sizeOfLogFiles','numberOfLogFiles']
+	def stringParams=['appName','branch','remoteUser','remoteHost','logRoot','profile','logLevel']
+	def intParams=['serverPort','instanceID','sizeOfLogFiles','numberOfLogFiles']
 	//These are parameters whose values are integers, not necessarily which are integer params in jenkins 
 
 	def boolParams=['checkoutNeeded']
@@ -78,7 +77,7 @@ node{
 	   remoteUser=paramsMap.get('remoteUser')
 	   remoteHost=paramsMap.get('remoteHost')
 	   baseDir=paramsMap.get('appName')
-	   consumerNumber=paramsMap.get('consumerNumber');
+	   consumerNumber=paramsMap.get('instanceID');
 	    
 	   sshLsCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} ls -l ${baseDir}/${consumerNumber}"
 
@@ -92,7 +91,7 @@ node{
        rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress build/libs/ ${remoteUser}@${remoteHost}:${baseDir}/${consumerNumber}"
        echo rsyncCommand
        
-                                       sshRestartCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${consumerNumber}/production_restart.sh ${consumerNumber} ${paramsMap.get('port')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('logRoot')}"
+                                       sshRestartCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${consumerNumber}/production_restart.sh ${paramsMap.get('serverPort')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('logLevel')} ${consumerNumber} ${paramsMap.get('logRoot')}"
                                     echo sshRestartCommand
 
                        
