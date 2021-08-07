@@ -1,11 +1,13 @@
+
+
 node{
 	//todo - Store port to Device type in map, after all bugs are fixed. 
 
-	def stringParams=['appName','branch','remoteUser','remoteHost','logRoot','profile','loglevel','instanceID']
+	def stringParams=['appName','branch','remoteUser','logRoot','baseDir','profile','loglevel','instanceID','remoteHost']
 		def intParams=['port','sizeOfLogFiles','numberOfLogFiles']
 		//These are parameters whose values are integers, not necessarily which are integer params in jenkins 
 
-		def boolParams=['commitNeeded']
+		def boolParams=['checkoutNeeded']
 
 		def paramsMap=[:] 
 
@@ -54,7 +56,7 @@ node{
 
 	stage ('Checkout'){
 
-		if(paramsMap.get("commitNeeded"))
+		if(paramsMap.get("checkoutNeeded"))
 		{
 
 			checkout([$class: 'GitSCM',branches: [[name: paramsMap.get("branch") ]],userRemoteConfigs: [[credentialsId: 'deployjava', url: 'git@gitlab.com:axestrack_bankend/kafka_producer_microservice.git']]])
@@ -79,10 +81,12 @@ node{
 				echo "Finished building...."
 
 	}
+
+    
 	stage('SSH transfer and restart') {
 		remoteUser=paramsMap.get('remoteUser')
-			remoteHost=paramsMap.get('remoteHost')
-			baseDir=paramsMap.get('appName');
+		remoteHost=paramsMap.get('remoteHost')
+		baseDir=paramsMap.get('baseDir');
 
 		sshLsCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} ls -l ${baseDir}"
 
@@ -90,7 +94,6 @@ node{
 
 			mkdirCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} mkdir -p ${baseDir}"
 			echo mkdirCommand
-
 
 
 			rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress build/libs/ ${remoteUser}@${remoteHost}:${baseDir}"
@@ -123,11 +126,8 @@ node{
 				echo err.getMessage()
 		}
 
-
+           
 
 	}
 
-
-
 }
-
