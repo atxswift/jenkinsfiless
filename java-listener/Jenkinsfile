@@ -111,6 +111,8 @@ node {
 
 
 			serverPort=port + 6000
+			echo serverPort.toString()
+			echo port.toString()
 
 			sshRestartCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${port}/production_restart.sh ${serverPort} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')}  ${paramsMap.get('logLevel')} ${port}  ${logRoot}"
 
