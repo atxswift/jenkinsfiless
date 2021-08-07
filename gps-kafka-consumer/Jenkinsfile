@@ -1,7 +1,7 @@
 node{
 	
-	def stringParams=['appName','branch','remoteUser','remoteHost','logRoot','profile','logLevel']
-	def intParams=['serverPort','instanceID','sizeOfLogFiles','numberOfLogFiles']
+	def stringParams=['appName','branch','remoteUser','remoteHost','logRoot','profile','logLevel','instanceID']
+	def intParams=['serverPort','sizeOfLogFiles','numberOfLogFiles']
 	//These are parameters whose values are integers, not necessarily which are integer params in jenkins 
 
 	def boolParams=['checkoutNeeded']
