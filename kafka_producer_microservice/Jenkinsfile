@@ -3,11 +3,11 @@
 node{
 	//todo - Store port to Device type in map, after all bugs are fixed. 
 
-	def stringParams=['appName','branch','remoteUser','logRoot','baseDir','profile','loglevel','instanceID','remoteHost']
+	def stringParams=['appName','branch','remoteUser','logRoot','profile','loglevel','instanceID','remoteHost']
 		def intParams=['port','sizeOfLogFiles','numberOfLogFiles']
 		//These are parameters whose values are integers, not necessarily which are integer params in jenkins 
 
-		def boolParams=['checkoutNeeded']
+		def boolParams=['commitNeeded']
 
 		def paramsMap=[:] 
 
@@ -56,7 +56,7 @@ node{
 
 	stage ('Checkout'){
 
-		if(paramsMap.get("checkoutNeeded"))
+		if(paramsMap.get("commitNeeded"))
 		{
 
 			checkout([$class: 'GitSCM',branches: [[name: paramsMap.get("branch") ]],userRemoteConfigs: [[credentialsId: 'deployjava', url: 'git@gitlab.com:axestrack_bankend/kafka_producer_microservice.git']]])
