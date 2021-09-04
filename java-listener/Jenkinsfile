@@ -61,7 +61,7 @@ node {
 
 
 	stage ('Checkout'){
-		if(buildNeeded)
+		if(paramsMap.get('buildNeeded'))
 		{
 			checkout([$class: 'GitSCM',
 					branches: [[name: paramsMap.get("branch")]],
@@ -71,7 +71,7 @@ node {
 	}
 
 	stage ('Build'){
-		if(buildNeeded){
+		if(paramsMap.get('buildNeeded')){
 		echo "Building listener..."
 		sh "ls -la ${pwd()}"
 		sh "ls -la ."
