@@ -6,7 +6,7 @@ node {
 
 		def stringParams=['cloudConfigUri','appName','branch','remoteUser','remoteHost','profile','logLevel','logRoot','listenerPorts']
 		def intParams=['sizeOfLogFiles','numberOfLogFiles']
-		def boolParams=['checkoutNeeded']
+		def boolParams=['buildNeeded']
 
 
 		stage ('Parse Params'){
@@ -61,7 +61,7 @@ node {
 
 
 	stage ('Checkout'){
-		if(checkoutNeeded)
+		if(paramsMap.get('buildNeeded'))
 		{
 			checkout([$class: 'GitSCM',
 					branches: [[name: paramsMap.get("branch")]],
@@ -71,6 +71,7 @@ node {
 	}
 
 	stage ('Build'){
+		if(paramsMap.get('buildNeeded')){
 		echo "Building listener..."
 		sh "ls -la ${pwd()}"
 		sh "ls -la ."
@@ -81,6 +82,7 @@ node {
 		{
 			error("Build failed with return value ${retVal.toString()}") 
 		}	
+		}
 		echo "Finished building...."
 	}
 	
