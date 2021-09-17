@@ -1,0 +1,77 @@
+node {
+	//todo - Store port to Device type in map, after all bugs are fixed. 
+	def listenerPorts=[];
+	def remoteHost
+	 def paramsMap=[:]
+
+		def stringParams=['appName','branch','remoteUser','remoteHost','profile']
+		def intParams=[]
+		def boolParams=['buildNeeded']
+
+
+		stage ('Parse Params'){
+
+			echo this.params.toString()
+			echo this.params.getClass().toString()
+
+			stringParams.each {key->
+				val=this.params.get(key)
+				if (val==null)
+					error('Got null value for '+key )
+					paramsMap.put(key,val.trim())
+				}
+
+			intParams.each {key->
+				val=this.params.get(key)
+				if (val==null)
+					error('Got null value for '+key )
+					else if (!val.trim().isInteger())
+					{
+						error('Got non-integer value for '+key + ":"+val.trim() )
+					}
+					paramsMap.put(key,val.trim())
+				}
+
+			boolParams.each {key->
+				val=this.params.get(key)
+				if (val==null)
+					error('Got null value for '+key )
+				paramsMap.put(key,val.toBoolean())
+			}
+
+
+		}
+
+
+	stage ('Checkout'){
+		if(paramsMap.get('buildNeeded'))
+		{
+			checkout([$class: 'GitSCM',
+					branches: [[name: paramsMap.get("branch")]],
+					userRemoteConfigs: [[credentialsId: 'Axestrack_Gitlab_Creds',
+					url: 'git@gitlab.com:']]])
+		}
+	}
+
+	stage ('Build'){
+		if(paramsMap.get('buildNeeded')){
+		echo "Building listener..."
+		sh "ls -la ${pwd()}"
+		sh "ls -la ."
+		sh "pwd"
+		retVal=sh(returnStatus: true,script:"sh ./build.sh")
+		echo "Build returned ${retVal.toString()}"
+		if (retVal!=0)
+		{
+			error("Build failed with return value ${retVal.toString()}") 
+		}	
+		}
+		echo "Finished building...."
+	}
+	
+	stage('SSH transfer and restart') {
+
+		
+	}
+}
+
