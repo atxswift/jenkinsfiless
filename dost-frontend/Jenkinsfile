@@ -82,6 +82,14 @@ node {
 		 rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress dist/ ${remoteUser}@${remoteHost}:${baseDir}/${remoteDir}"
                  echo rsyncCommand
 
+        
+                                sh mkdirCommand
+                                //This is a test command
+                                sh sshLsCommand
+                                //This is the actual copy command
+                                sh rsyncCommand
+
+
 	
 	}
 }
