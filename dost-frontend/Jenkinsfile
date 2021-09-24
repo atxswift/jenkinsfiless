@@ -4,7 +4,7 @@ node {
 	def remoteHost
 	 def paramsMap=[:]
 
-		def stringParams=['appName','branch','remoteUser','remoteHost','profile']
+		def stringParams=['appName','branch','remoteUser','remoteHost','profile','baseDir']
 		def intParams=[]
 		def boolParams=['buildNeeded']
 
@@ -70,8 +70,19 @@ node {
 	}
 	
 	stage('SSH transfer and restart') {
+		remoteUser=paramsMap.get('remoteUser')
+                remoteHost=paramsMap.get('remoteHost')
+		remoteDir=paramsMap.get('baseDir')+'/'+paramsMap.get('appName')
+		sshLsCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} ls -l ${remoteDir}"
+                echo sshLsCommand
 
-		
+		 mkdirCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} mkdir -p ${remoteDir}"
+                 echo mkdirCommand
+
+		 rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress dist/ ${remoteUser}@${remoteHost}:${baseDir}/${remoteDir}"
+                 echo rsyncCommand
+
+	
 	}
 }
 
