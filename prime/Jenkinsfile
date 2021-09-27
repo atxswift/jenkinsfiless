@@ -49,7 +49,7 @@ node {
 			checkout([$class: 'GitSCM',
 					branches: [[name: paramsMap.get("branch")]],
 					userRemoteConfigs: [[credentialsId: 'Axestrack_Gitlab_Creds',
-					url: 'gitlab.com:elogist-web-apps/itrm.git']]])
+					url: 'git@gitlab.com:elogist-web-apps/itrm.git']]])
 		}
 	}
 
