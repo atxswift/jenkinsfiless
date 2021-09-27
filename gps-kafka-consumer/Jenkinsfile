@@ -58,7 +58,8 @@ node{
 	}
 
 	stage ('Build'){
-		
+                if(paramsMap.get("checkoutNeeded"))
+		{		
 		echo "Building consumer..."
 		sh "ls -la ${pwd()}"
 		sh "ls -la ."
@@ -71,7 +72,7 @@ node{
 			error("Build failed with return value ${retVal.toString()}") 
 		}	
 		echo "Finished building...."
-
+		}
 	}
 	stage('SSH transfer and restart') {
 	   remoteUser=paramsMap.get('remoteUser')
