@@ -6,7 +6,7 @@ node {
 
 		def stringParams=['appName','branch','remoteUser','remoteHost','profile','baseDir']
 		def intParams=[]
-		def boolParams=['buildNeeded']
+		def boolParams=['buildNeeded','copyToServer']
 
 
 		stage ('Parse Params'){
@@ -74,6 +74,9 @@ node {
 	}
 	
 	stage('SSH transfer and restart') {
+		 if(paramsMap.get('copyToServer'))
+                {
+
 		remoteUser=paramsMap.get('remoteUser')
                 remoteHost=paramsMap.get('remoteHost')
 		remoteDir=paramsMap.get('baseDir')+'/'+paramsMap.get('appName')
@@ -95,8 +98,8 @@ node {
                                 sh rsyncCommand
                         }
 
-
-	
+		}
+		
 	}
 }
 
