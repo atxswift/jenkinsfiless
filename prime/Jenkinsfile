@@ -55,7 +55,7 @@ node {
 
 	stage ('Build'){
 		if(paramsMap.get('buildNeeded')){
-		echo "Building dost frontend..."
+		echo "Building prime frontend..."
 		sh "ls -la ${pwd()}"
 		sh "ls -la ."
 		sh "pwd"
