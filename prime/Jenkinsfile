@@ -1,4 +1,4 @@
-node node ("Powerful_64_GB_Machine"){
+node("Powerful_64_GB_Machine"){
 	//todo - Store port to Device type in map, after all bugs are fixed. 
 	def listenerPorts=[];
 	def remoteHost
