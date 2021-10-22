@@ -1,4 +1,4 @@
-node("jsbuild"){
+node{
 	//todo - Store port to Device type in map, after all bugs are fixed. 
 	def listenerPorts=[];
 	def remoteHost
