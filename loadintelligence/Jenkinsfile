@@ -83,6 +83,7 @@ node{
 		remoteUser=paramsMap.get('remoteUser')
 			remoteHost=paramsMap.get('remoteHost')
 			baseDir=paramsMap.get('baseDir');
+			instanceId=paramsMap.get('instanceID');
 
 		sshLsCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} ls -l ${baseDir}"
 
@@ -93,10 +94,10 @@ node{
 
 
 
-			rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress build/libs/ ${remoteUser}@${remoteHost}:${baseDir}"
+			rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress build/libs/ ${remoteUser}@${remoteHost}:${baseDir}/${instanceID}"
 			echo rsyncCommand
 
-			sshRestartCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/production_restart.sh ${paramsMap.get('port')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('loglevel')} ${paramsMap.get('instanceID')} ${paramsMap.get('logRoot')} ${paramsMap.get('cloudConfigUri')}"
+			sshRestartCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${instanceID}/production_restart.sh ${paramsMap.get('port')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('loglevel')} ${paramsMap.get('instanceID')} ${paramsMap.get('logRoot')} ${paramsMap.get('cloudConfigUri')}"
 			echo sshRestartCommand
 
 
