@@ -54,7 +54,7 @@ node{
 			checkout([$class: 'GitSCM',
 					branches: [[name: paramsMap.get("branch")]],
 					userRemoteConfigs: [[credentialsId: 'Axestrack_Gitlab_Creds',
-					url: 'git@gitlab.com:mobile_app_uat/Prime_Flutter_UAT.git']]])
+					url: 'git@gitlab.com:xflutter_apps/prime-flutter-app.git']]])
 		}
 	}
 /*
