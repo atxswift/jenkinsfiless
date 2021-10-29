@@ -1,40 +1,5 @@
 ANDROID_SDK_ROOT='/home/stuti/Android-SDK/'
 
-/*def now = new Date()
-node {
-   stage('Preparation') { // for display purposes
-        // Get some code from a GitHub repository
-   echo "Test pipeline"
-   value = now.format("yyyy.MM.dd").toString()
-   println now.format("yyyy.MM.dd")
-   cleanWs()
-    checkout([$class: 'GitSCM',
-             branches: [[name: '*/**']],
-             extensions: [[$class: 'RelativeTargetDirectory', 
-             relativeTargetDir: 'prime-flutter-app']], 
-             userRemoteConfigs: [[credentialsId: 'stuti', url: 'git@gitlab.com:xflutter_apps/prime-flutter-app.git']]])
-   
-   }
-   
-   stage ('Build') {
-      dir ("prime-flutter-app") {
-      sh  "flutter build apk --debug"
-     
-       
-      }
-      
-      sshagent (credentials: ['stuti']) {
-        sh "git clone git@gitlab.com:mobile_app_uat/Prime_Flutter_UAT.git"
-        dir ("Prime_Flutter_UAT") { 
-            sh  "cp -r $WORKSPACE/prime-flutter-app/build/app/outputs/flutter-apk/app-debug.apk app-debug-$value-${BUILD_NUMBER}.apk"
-            sh "git add app-debug-$value-${BUILD_NUMBER}.apk"
-            sh "git commit -m 'upload apk'"
-            sh "git push origin master"
-            
-        }
-      }
-   }
-}*/
 
 
 
