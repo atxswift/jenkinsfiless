@@ -1,6 +1,6 @@
 ANDROID_SDK_ROOT='/home/stuti/Android-SDK/'
 
-def now = new Date()
+/*def now = new Date()
 node {
    stage('Preparation') { // for display purposes
         // Get some code from a GitHub repository
@@ -34,7 +34,7 @@ node {
         }
       }
    }
-}
+}*/
 
 
 
@@ -89,10 +89,10 @@ node{
 			checkout([$class: 'GitSCM',
 					branches: [[name: paramsMap.get("branch")]],
 					userRemoteConfigs: [[credentialsId: 'Axestrack_Gitlab_Creds',
-					url: 'git@gitlab.com:elogist-web-apps/itrm.git']]])
+					url: 'git@gitlab.com:mobile_app_uat/Prime_Flutter_UAT.git']]])
 		}
 	}
-
+/*
 	stage ('Build'){
 		if(paramsMap.get('buildNeeded')){
 		echo "Building prime frontend..."
@@ -140,6 +140,6 @@ node{
 
 		}
 
-	}
+	}*/
 }
 
