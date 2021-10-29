@@ -65,7 +65,7 @@ node{
 
 	stage ('Build'){
 
-		echo "Building consumer..."
+		echo "Building Load Intelligence Webapp..."
 			sh "ls -la ${pwd()}"
 			sh "ls -la ."
 			sh "pwd"
