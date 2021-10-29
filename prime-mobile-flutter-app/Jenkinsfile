@@ -1,0 +1,145 @@
+ANDROID_SDK_ROOT='/home/stuti/Android-SDK/'
+
+def now = new Date()
+node {
+   stage('Preparation') { // for display purposes
+        // Get some code from a GitHub repository
+   echo "Test pipeline"
+   value = now.format("yyyy.MM.dd").toString()
+   println now.format("yyyy.MM.dd")
+   cleanWs()
+    checkout([$class: 'GitSCM',
+             branches: [[name: '*/**']],
+             extensions: [[$class: 'RelativeTargetDirectory', 
+             relativeTargetDir: 'prime-flutter-app']], 
+             userRemoteConfigs: [[credentialsId: 'stuti', url: 'git@gitlab.com:xflutter_apps/prime-flutter-app.git']]])
+   
+   }
+   
+   stage ('Build') {
+      dir ("prime-flutter-app") {
+      sh  "flutter build apk --debug"
+     
+       
+      }
+      
+      sshagent (credentials: ['stuti']) {
+        sh "git clone git@gitlab.com:mobile_app_uat/Prime_Flutter_UAT.git"
+        dir ("Prime_Flutter_UAT") { 
+            sh  "cp -r $WORKSPACE/prime-flutter-app/build/app/outputs/flutter-apk/app-debug.apk app-debug-$value-${BUILD_NUMBER}.apk"
+            sh "git add app-debug-$value-${BUILD_NUMBER}.apk"
+            sh "git commit -m 'upload apk'"
+            sh "git push origin master"
+            
+        }
+      }
+   }
+}
+
+
+
+node{
+	//todo - Store port to Device type in map, after all bugs are fixed.
+	def listenerPorts=[];
+	def remoteHost
+	 def paramsMap=[:]
+
+		def stringParams=['appName','branch','remoteUser','remoteHost','profile','baseDir']
+		def intParams=[]
+		def boolParams=['buildNeeded','copyToServer']
+
+
+		stage ('Parse Params'){
+
+			echo this.params.toString()
+			echo this.params.getClass().toString()
+
+			stringParams.each {key->
+				val=this.params.get(key)
+				if (val==null)
+					error('Got null value for '+key )
+					paramsMap.put(key,val.trim())
+				}
+
+			intParams.each {key->
+				val=this.params.get(key)
+				if (val==null)
+					error('Got null value for '+key )
+					else if (!val.trim().isInteger())
+					{
+						error('Got non-integer value for '+key + ":"+val.trim() )
+					}
+					paramsMap.put(key,val.trim())
+				}
+
+			boolParams.each {key->
+				val=this.params.get(key)
+				if (val==null)
+					error('Got null value for '+key )
+				paramsMap.put(key,val.toBoolean())
+			}
+
+
+		}
+
+
+	stage ('Checkout'){
+		if(paramsMap.get('buildNeeded'))
+		{
+			checkout([$class: 'GitSCM',
+					branches: [[name: paramsMap.get("branch")]],
+					userRemoteConfigs: [[credentialsId: 'Axestrack_Gitlab_Creds',
+					url: 'git@gitlab.com:elogist-web-apps/itrm.git']]])
+		}
+	}
+
+	stage ('Build'){
+		if(paramsMap.get('buildNeeded')){
+		echo "Building prime frontend..."
+		sh "ls -la ${pwd()}"
+		sh "ls -la ."
+		sh "pwd"
+
+        	profile=paramsMap.get('profile')
+        	echo profile
+		command="sh ./build.sh " + profile
+		retVal=sh(returnStatus: true,script:command)
+		echo "Build returned ${retVal.toString()}"
+		if (retVal!=0)
+		{
+			error("Build failed with return value ${retVal.toString()}")
+		}
+		}
+		echo "Finished building...."
+	}
+
+	stage('SSH transfer and restart') {
+		 if(paramsMap.get('copyToServer'))
+                {
+
+		remoteUser=paramsMap.get('remoteUser')
+                remoteHost=paramsMap.get('remoteHost')
+		remoteDir=paramsMap.get('baseDir')+'/'+paramsMap.get('appName')
+		sshLsCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} ls -l ${remoteDir}"
+                echo sshLsCommand
+
+		 mkdirCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} mkdir -p ${remoteDir}"
+                 echo mkdirCommand
+
+		 rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress itrm/ ${remoteUser}@${remoteHost}:${remoteDir}"
+                 echo rsyncCommand
+
+                          sshagent(credentials : ['deployjava']) {
+
+                                sh mkdirCommand
+                                //This is a test command
+                                sh sshLsCommand
+                                //This is the actual copy command
+                                sh rsyncCommand
+                        }
+
+		}
+
+	}
+}
+
