@@ -6,7 +6,7 @@ node {
 
 		def stringParams=['cloudConfigUri','appName','branch','remoteUser','remoteHost','profile','logLevel','logRoot','listenerPorts']
 		def intParams=['sizeOfLogFiles','numberOfLogFiles']
-		def boolParams=['buildNeeded','copyToServer']
+		def boolParams=['buildNeeded']
 
 
 		stage ('Parse Params'){
