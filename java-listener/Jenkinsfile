@@ -6,7 +6,7 @@ node {
 
 		def stringParams=['cloudConfigUri','appName','branch','remoteUser','remoteHost','profile','logLevel','logRoot','listenerPorts']
 		def intParams=['sizeOfLogFiles','numberOfLogFiles']
-		def boolParams=['buildNeeded']
+		def boolParams=['buildNeeded','copyToServer']
 
 
 		stage ('Parse Params'){
@@ -87,6 +87,8 @@ node {
 	}
 	
 	stage('SSH transfer and restart') {
+		if(paramsMap.get('copyToServer'))
+		{
 
 		//Later, there will be a single location, with different params.
 		//Can use a flag for multiple or single copies. 
@@ -136,7 +138,8 @@ node {
 					echo "This is a false alarm, because we're waiting 30 secs to see the logs... We're using this workaround until we figure out how to set timeout for "
 					echo err.getMessage()
 				}
-				
+
+				}
 			}	
 				
 		}
