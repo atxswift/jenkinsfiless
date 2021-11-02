@@ -5,7 +5,7 @@ node{
 		def intParams=['port','sizeOfLogFiles','numberOfLogFiles']
 		//These are parameters whose values are integers, not necessarily which are integer params in jenkins 
 
-		def boolParams=['checkoutNeeded','copyToServer']
+		def boolParams=['checkoutNeeded']
 
 		def paramsMap=[:] 
 
@@ -80,9 +80,6 @@ node{
 
 	}
 	stage('SSH transfer and restart') {
-	 	if(paramsMap.get('copyToServer'))
-		{
-
 		remoteUser=paramsMap.get('remoteUser')
 			remoteHost=paramsMap.get('remoteHost')
 			baseDir=paramsMap.get('baseDir');
@@ -99,7 +96,7 @@ node{
 			rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress build/libs/ ${remoteUser}@${remoteHost}:${baseDir}/${paramsMap.get('instanceID')}"
 			echo rsyncCommand
 
-			sshRestartCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${paramsMap.get('instanceID')}/production_restart.sh ${paramsMap.get('port')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('loglevel')} ${paramsMap.get('instanceID')} ${paramsMap.get('logRoot')} ${paramsMap.get('cloudConfigUri')}"
+                        sshRestartCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${paramsMap.get('instanceID')}/production_restart.sh ${paramsMap.get('port')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('loglevel')} ${paramsMap.get('instanceID')} ${paramsMap.get('logRoot')} ${paramsMap.get('cloudConfigUri')}"
 			echo sshRestartCommand
 
 
@@ -128,10 +125,10 @@ node{
 
 
 
-		}
+	}
 
-   	}
-		
+
+
 }
 
 
