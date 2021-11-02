@@ -64,6 +64,8 @@ node{
 	}
 
 	stage ('Build'){
+		    if(paramsMap.get("checkoutNeeded"))
+                {
 
 		echo "Building consumer..."
 			sh "ls -la ${pwd()}"
@@ -78,6 +80,7 @@ node{
 				//		}	
 				echo "Finished building...."
 
+	}
 	}
 	stage('SSH transfer and restart') {
 	     if(paramsMap.get('copyToServer'))
@@ -118,7 +121,7 @@ node{
 				}
 
 
-			}
+			}}
 
 		catch(err)
 		{
