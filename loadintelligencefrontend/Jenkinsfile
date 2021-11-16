@@ -57,6 +57,7 @@ node{
 		if(paramsMap.get('buildNeeded')){
 		echo "No build needed, as this is not an angular/react project"
 		echo "Finished building...."
+		}
 	}
 	
 	stage('SSH transfer and restart') {
