@@ -1,7 +1,7 @@
 node{
 	//todo - Store port to Device type in map, after all bugs are fixed. 
 
-	def stringParams=['appName','branch','remoteUser','remoteHost','logRoot','profile','loglevel','instanceID']
+	def stringParams=['appName','branch','remoteUser','remoteHost','logRoot','profile','loglevel','instanceID','cloudConfigUri']
 		def intParams=['port','sizeOfLogFiles','numberOfLogFiles']
 		//These are parameters whose values are integers, not necessarily which are integer params in jenkins 
 
@@ -102,33 +102,35 @@ node{
 			rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress build/libs/ ${remoteUser}@${remoteHost}:${baseDir}"
 			echo rsyncCommand
 
-			sshRestartCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/production_restart.sh ${paramsMap.get('port')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('loglevel')} ${paramsMap.get('instanceID')} ${paramsMap.get('logRoot') }"
+			sshRestartCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/production_restart.sh ${paramsMap.get('port')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('loglevel')} ${paramsMap.get('instanceID')} ${paramsMap.get('logRoot')} ${paramsMap.get('cloudConfigUri')} "
 			echo sshRestartCommand
 
-
+			//todo move the mkdir and ls command to outside the try block. 
 			try{
 				sshagent(credentials : ['deployjava']) {
 					//todo add checks for return values here
 					//make directory if it doesnt exist
-					sh mkdirCommand
+						sh mkdirCommand
 						//This is a test command
 						sh sshLsCommand
 						//This is the actual copy command
 						sh rsyncCommand
-
 						sh sshRestartCommand
 
 				}
 
 
 			}
+
+			catch(err)
+			{
+				echo "This is a false alarm, because we're waiting 30 secs to see the logs... We're using this workaround until we figure out how to set timeout for "
+				echo err.getMessage()
+			}
+
 		}
 
-		catch(err)
-		{
-			echo "This is a false alarm, because we're waiting 30 secs to see the logs... We're using this workaround until we figure out how to set timeout for "
-				echo err.getMessage()
-		}
+		
 
             }
 
