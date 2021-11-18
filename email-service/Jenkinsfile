@@ -4,7 +4,7 @@ node{
 	def intParams=['serverPort','instanceID','sizeOfLogFiles','numberOfLogFiles']
 	//These are parameters whose values are integers, not necessarily which are integer params in jenkins 
 
-	def boolParams=['checkoutNeeded']
+	def boolParams=['checkoutNeeded','copyToServer']
 	
 	def paramsMap=[:] 
 
@@ -51,7 +51,7 @@ node{
 		if(paramsMap.get("checkoutNeeded"))
 		{
 		    
-		checkout([$class: 'GitSCM',branches: [[name: paramsMap.get("branch") ]],userRemoteConfigs: [[credentialsId: 'deployjava', url: 'git@gitlab.com:elogistjavaprojects/trips.git']]])
+		checkout([$class: 'GitSCM',branches: [[name: paramsMap.get("branch") ]],userRemoteConfigs: [[credentialsId: 'deployjava', url: 'git@gitlab.com:elogistjavaprojects/email_service.git']]])
 		
 		    
 		}
@@ -74,6 +74,9 @@ node{
 
 	}
 	stage('SSH transfer and restart') {
+  	     if(paramsMap.get('copyToServer'))
+	     {
+
 	   remoteUser=paramsMap.get('remoteUser')
 	   remoteHost=paramsMap.get('remoteHost')
 	   baseDir=paramsMap.get('appName')
@@ -92,7 +95,6 @@ node{
        echo rsyncCommand
        
                                        sshRestartCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${consumerNumber}/production_restart.sh ${paramsMap.get('serverPort')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('logLevel')} ${consumerNumber} ${paramsMap.get('logRoot')} ${paramsMap.get('cloudConfigUri')}"
-
                                     echo sshRestartCommand
 
                        
@@ -119,11 +121,11 @@ node{
                                         echo err.getMessage()
                         }
 
-
+ 		}
 
 	}
 	
-	    
+   	    
 	
 }
 

@@ -1,6 +1,6 @@
 node{
 	
-	def stringParams=['appName','branch','remoteUser','remoteHost','logRoot','profile','logLevel']
+	def stringParams=['cloudConfigUri','appName','branch','remoteUser','remoteHost','logRoot','profile','logLevel']
 	def intParams=['serverPort','instanceID','sizeOfLogFiles','numberOfLogFiles']
 	//These are parameters whose values are integers, not necessarily which are integer params in jenkins 
 
@@ -91,7 +91,8 @@ node{
        rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress build/libs/ ${remoteUser}@${remoteHost}:${baseDir}/${consumerNumber}"
        echo rsyncCommand
        
-                                       sshRestartCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${consumerNumber}/production_restart.sh ${paramsMap.get('serverPort')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('logLevel')} ${consumerNumber} ${paramsMap.get('logRoot')}"
+                                       sshRestartCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${consumerNumber}/production_restart.sh ${paramsMap.get('serverPort')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('logLevel')} ${consumerNumber} ${paramsMap.get('logRoot')} ${paramsMap.get('cloudConfigUri')}"
+
                                     echo sshRestartCommand
 
                        
