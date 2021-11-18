@@ -4,11 +4,10 @@ node {
 	def remoteHost
 	 def paramsMap=[:]
 
-		def stringParams=['cloudConfigUri','appName','branch','remoteUser','remoteHost','profile','logLevel','logRoot','listenerPorts']
+		def stringParams=['cloudConfigUri','appName','branch','remoteUser','remoteHost','profile','logLevel','logRoot','listenerPorts','typeOfOperation']
 		def intParams=['sizeOfLogFiles','numberOfLogFiles']
 		def boolParams=['buildNeeded','copyToServer']
-
-
+		def opType=''
 		stage ('Parse Params'){
 
 			echo this.params.toString()
@@ -57,11 +56,12 @@ node {
 				}
 			}
 			println listenerPorts
+			opType=paramsMap.get('typeOfOperation')
 		}
 
 
 	stage ('Checkout'){
-		if(paramsMap.get('buildNeeded'))
+		if(paramsMap.get('buildNeeded') && opType!='shutdown')
 		{
 			checkout([$class: 'GitSCM',
 					branches: [[name: paramsMap.get("branch")]],
@@ -71,7 +71,7 @@ node {
 	}
 
 	stage ('Build'){
-		if(paramsMap.get('buildNeeded')){
+		if(paramsMap.get('buildNeeded') && opType!='shutdown'){
 		echo "Building listener..."
 		sh "ls -la ${pwd()}"
 		sh "ls -la ."
@@ -87,8 +87,7 @@ node {
 	}
 	
 	stage('SSH transfer and restart') {
-		if(paramsMap.get('copyToServer'))
-		{
+	
 
 		//Later, there will be a single location, with different params.
 		//Can use a flag for multiple or single copies. 
@@ -115,23 +114,43 @@ node {
 
 
 			serverPort=port + 6000
+        
+            if(opType=='restart')
+            {
+			sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${port}/production_restart.sh ${serverPort} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')}  ${paramsMap.get('logLevel')}  ${port}  ${logRoot} ${paramsMap.get('cloudConfigUri')}"
+             }
+             else if (opType=='start')
+            {
+                  
+			sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${port}/production_start.sh ${serverPort} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')}  ${paramsMap.get('logLevel')}  ${port}  ${logRoot} ${paramsMap.get('cloudConfigUri')}"
+             
+            }
+else if(opType=='shutdown')
+{
+sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${port}/production_shutdown.sh ${logRoot} ${port}"
+}
+else{
+error ('invalid typeOfOperation!')
+}
 
-			sshRestartCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${port}/production_restart.sh ${serverPort} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')}  ${paramsMap.get('logLevel')}  ${port}  ${logRoot} ${paramsMap.get('cloudConfigUri')}"
-
-			echo sshRestartCommand
+                
+			echo sshRunCommand
 
 			sshagent(credentials : ['deployjava']) {	
 				//todo add checks for return values here
 				//make directory if it doesnt exist
+			    if(opType!='shutdown' && paramsMap.get('copyToServer'))
+                {
 				sh mkdirCommand
 				//This is a test command
 				sh sshLsCommand
 				//This is the actual copy command
-				sh rsyncCommand
+                    sh rsyncCommand
+                }
 				//This command starts the server. 
 							
 				try{
-					sh sshRestartCommand
+					sh sshRunCommand
 				}
 				catch(err)
 				{
@@ -142,7 +161,7 @@ node {
 				}
 			}	
 				
-		}
+		
 	}
 }
 
