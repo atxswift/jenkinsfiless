@@ -4,7 +4,7 @@ node{
 		def intParams=['serverPort','instanceID','sizeOfLogFiles','numberOfLogFiles']
 		//These are parameters whose values are integers, not necessarily which are integer params in jenkins 
 
-		def boolParams=['checkoutNeeded','copyToServer']
+		def boolParams=['buildNeeded','copyToServer']
 		def opType=''
 		def paramsMap=[:] 
 
