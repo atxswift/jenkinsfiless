@@ -1,166 +1,148 @@
-node {
-	//todo - Store port to Device type in map, after all bugs are fixed. 
-	def listenerPorts=[];
-	def remoteHost
-	 def paramsMap=[:]
+node{
 
-		def stringParams=['cloudConfigUri','appName','branch','remoteUser','remoteHost','profile','logLevel','logRoot','serverPorts','typeOfOperation']
-		def intParams=['sizeOfLogFiles','numberOfLogFiles']
-		def boolParams=['buildNeeded','copyToServer']
+	def stringParams=['cloudConfigUri','appName','branch','remoteUser','remoteHost','logRoot','profile','logLevel','typeOfOperation']
+		def intParams=['serverPort','instanceID','sizeOfLogFiles','numberOfLogFiles']
+		//These are parameters whose values are integers, not necessarily which are integer params in jenkins 
+
+		def boolParams=['checkoutNeeded','copyToServer']
 		def opType=''
-		stage ('Parse Params'){
+		def paramsMap=[:] 
 
+
+		stage ('Parse Params')
+		{
 			echo this.params.toString()
-			echo this.params.getClass().toString()
+				echo this.params.getClass().toString()
 
-			stringParams.each {key->
-				val=this.params.get(key)
-				if (val==null)
-					error('Got null value for '+key )
-					paramsMap.put(key,val.trim())
+				stringParams.each {key->
+					val=this.params.get(key)
+						if (val==null)
+							error('Got null value for '+key )
+								paramsMap.put(key,val.trim())
+
 				}
 
 			intParams.each {key->
 				val=this.params.get(key)
-				if (val==null)
-					error('Got null value for '+key )
+					if (val==null)
+						error('Got null value for '+key )
 					else if (!val.trim().isInteger())
 					{
-						error('Got non-integer value for '+key + ":"+val.trim() )
+						error('Got non-integer value for '+key + ":"+val.trim() )   
 					}
-					paramsMap.put(key,val.trim())
-				}
+				paramsMap.put(key,val.trim())
+
+			}
 
 			boolParams.each {key->
 				val=this.params.get(key)
-				if (val==null)
-					error('Got null value for '+key )
-				paramsMap.put(key,val.toBoolean())
+					if (val==null)
+						error('Got null value for '+key )
+							paramsMap.put(key,val.toBoolean())
 			}
 
 
 			echo paramsMap.toString()
-			echo this.params.toString()
 
-			String[]  rawPorts=paramsMap.get('listenerPorts').split(',')
-			for (port in rawPorts)
-			{
-				if( port.trim().isInteger())
-				{
-					listenerPorts.add(Integer.valueOf(port.trim()))
-				}
-				else
-				{
-					print 'found non-integer '+port.trim()+' in ports'
-					error ('found non-integer '+port.trim()+' in server_port' + 'aborting the build')
-				}
-			}
-			println listenerPorts
-			opType=paramsMap.get('typeOfOperation')
 		}
 
-
 	stage ('Checkout'){
-		if(paramsMap.get('buildNeeded') && opType!='shutdown')
+
+		if(paramsMap.get("checkoutNeeded")) && opType!='shutdown')
 		{
-			checkout([$class: 'GitSCM',
-					branches: [[name: paramsMap.get("branch")]],
-					userRemoteConfigs: [[credentialsId: 'Axestrack_Gitlab_Creds',
-					url: 'git@gitlab.com:axestrack_bankend/java-listener.git']]])
+
+			checkout([$class: 'GitSCM',branches: [[name: paramsMap.get("branch") ]],userRemoteConfigs: [[credentialsId: 'deployjava', url: 'git@gitlab.com:elogistjavaprojects/halts-creation.git']]])
+
+
 		}
 	}
 
 	stage ('Build'){
 		if(paramsMap.get('buildNeeded') && opType!='shutdown'){
-		echo "Building listener..."
-		sh "ls -la ${pwd()}"
-		sh "ls -la ."
-		sh "pwd"
-		retVal=sh(returnStatus: true,script:"sh ./build.sh")
-		echo "Build returned ${retVal.toString()}"
-		if (retVal!=0)
-		{
-			error("Build failed with return value ${retVal.toString()}") 
+			echo "Building consumer..."
+				sh "ls -la ${pwd()}"
+				sh "ls -la ."
+				sh "pwd"
+
+				retVal=sh(returnStatus: true,script:"sh ./build.sh")
+				echo "Build returned ${retVal.toString()}"
+				if (retVal!=0)
+				{
+					error("Build failed with return value ${retVal.toString()}") 
+				}
 		}	
-		}
 		echo "Finished building...."
+
 	}
-	
 	stage('SSH transfer and restart') {
-	
-
-		//Later, there will be a single location, with different params.
-		//Can use a flag for multiple or single copies. 
-		//Do this after bugs fixed. 
-		remoteUser=paramsMap.get('remoteUser')
-           	remoteHost=paramsMap.get('remoteHost')
-           	baseDir=paramsMap.get('appName')
-		profile=paramsMap.get('profile')
-
-		
-		
-		for (port in listenerPorts)
+		if(paramsMap.get('copyToServer'))
 		{
 
-			sshLsCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} ls -l ${baseDir}/${port}"
-			echo sshLsCommand
+			remoteUser=paramsMap.get('remoteUser')
+				remoteHost=paramsMap.get('remoteHost')
+				baseDir=paramsMap.get('appName')
+				consumerNumber=paramsMap.get('instanceID');
+
+			sshLsCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} ls -l ${baseDir}/${consumerNumber}"
+
+				echo sshLsCommand
+
+				mkdirCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} mkdir -p ${baseDir}/${consumerNumber}"
+				echo mkdirCommand
 
 
-			mkdirCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} mkdir -p ${baseDir}/${port}"
-			echo mkdirCommand
 
-			rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress build/libs/ ${remoteUser}@${remoteHost}:${baseDir}/${port}"
-			echo rsyncCommand
+				rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress build/libs/ ${remoteUser}@${remoteHost}:${baseDir}/${consumerNumber}"
+				echo rsyncCommand
 
 
-			serverPort=port + 6000
-        
-            if(opType=='restart')
-            {
-			sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${port}/production_restart.sh ${serverPort} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')}  ${paramsMap.get('logLevel')}  ${port}  ${logRoot} ${paramsMap.get('cloudConfigUri')}"
-             }
-             else if (opType=='start')
-            {
-                  
-			sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${port}/production_start.sh ${serverPort} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')}  ${paramsMap.get('logLevel')}  ${port}  ${logRoot} ${paramsMap.get('cloudConfigUri')}"
-             
-            }
-else if(opType=='shutdown')
-{
-sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${port}/production_shutdown.sh ${logRoot} ${port}"
-}
-else{
-error ('invalid typeOfOperation!')
-}
 
-                
+				if(opType=='restart')
+				{
+					sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${port}/production_restart.sh ${serverPort} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')}  ${paramsMap.get('logLevel')}  ${port}  ${logRoot} ${paramsMap.get('cloudConfigUri')}"
+				}
+				else if (opType=='start')
+				{
+
+					sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${port}/production_start.sh ${serverPort} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')}  ${paramsMap.get('logLevel')}  ${port}  ${logRoot} ${paramsMap.get('cloudConfigUri')}"
+
+				}
+				else if(opType=='shutdown')
+				{
+					sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${port}/production_shutdown.sh ${logRoot} ${port}"
+				}
+				else{
+					error ('invalid typeOfOperation!')
+				} 
+
 			echo sshRunCommand
 
-			sshagent(credentials : ['deployjava']) {	
-				//todo add checks for return values here
-				//make directory if it doesnt exist
-			    if(opType!='shutdown' && paramsMap.get('copyToServer'))
-                {
-				sh mkdirCommand
-				//This is a test command
-				sh sshLsCommand
-				//This is the actual copy command
-                    sh rsyncCommand
-                }
-				//This command starts the server. 
-							
-				try{
-					sh sshRunCommand
-				}
-				catch(err)
-				{
-					echo "This is a false alarm, because we're waiting 30 secs to see the logs... We're using this workaround until we figure out how to set timeout for "
-					echo err.getMessage()
-				}
+
+				sshagent(credentials : ['deployjava']) {	
+					//todo add checks for return values here
+					//make directory if it doesnt exist
+					if(opType!='shutdown' && paramsMap.get('copyToServer'))
+					{
+						sh mkdirCommand
+							//This is a test command
+							sh sshLsCommand
+							//This is the actual copy command
+							sh rsyncCommand
+					}
+					//This command starts the server. 
+
+					try{
+						sh sshRunCommand
+					}
+					catch(err)
+					{
+						echo "This is a false alarm, because we're waiting 30 secs to see the logs... We're using this workaround until we figure out how to set timeout for "
+							echo err.getMessage()
+					}
 
 				}
-			}	
-				
+		
+			
 		
 	}
 }
