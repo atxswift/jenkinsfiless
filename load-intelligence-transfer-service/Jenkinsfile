@@ -1,6 +1,6 @@
 node{
 
-	def stringParams=['cloudConfigUri','appName','branch','remoteUser','remoteHost','logRoot','profile','logLevel','typeOfOperation']
+	def stringParams=['cloudConfigUri','baseDir','branch','remoteUser','remoteHost','logRoot','profile','logLevel','typeOfOperation']
 		def intParams=['serverPort','instanceID','sizeOfLogFiles','numberOfLogFiles']
 		//These are parameters whose values are integers, not necessarily which are integer params in jenkins 
 
