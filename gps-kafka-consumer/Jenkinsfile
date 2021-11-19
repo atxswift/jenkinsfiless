@@ -1,7 +1,7 @@
 node{
 
 	def paramsMap=[:] 
-		def stringParams=['appName','branch','remoteUser','remoteHost','logRoot','profile','logLevel','instanceID','typeOfOperation']
+		def stringParams=['appName','branch','remoteUser','remoteHost','logRoot','profile','logLevel','instanceID','cloudConfigUri','typeOfOperation']
 		def intParams=['serverPort','sizeOfLogFiles','numberOfLogFiles']
 		def boolParams=['buildNeeded','copyToServer']
 
