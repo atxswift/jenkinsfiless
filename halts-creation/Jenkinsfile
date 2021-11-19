@@ -40,7 +40,8 @@ node{
 						error('Got null value for '+key )
 							paramsMap.put(key,val.toBoolean())
 			}
-
+		
+			opType=paramsMap.get('typeOfOperation')
 
 			echo paramsMap.toString()
 
