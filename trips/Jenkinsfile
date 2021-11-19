@@ -4,7 +4,7 @@ node{
 	def intParams=['serverPort','instanceID','sizeOfLogFiles','numberOfLogFiles']
 	//These are parameters whose values are integers, not necessarily which are integer params in jenkins 
 
-	def boolParams=['checkoutNeeded']
+	def boolParams=['buildNeeded']
 	
 	def paramsMap=[:] 
 
@@ -73,7 +73,9 @@ node{
 		echo "Finished building...."
 
 	}
-	stage('SSH transfer and restart') {
+	stage('SSH transfer and restart'){
+	   if(opType!='none')
+	   {
 	   remoteUser=paramsMap.get('remoteUser')
 	   remoteHost=paramsMap.get('remoteHost')
 	   baseDir=paramsMap.get('appName')
@@ -122,8 +124,8 @@ node{
 
 
 	}
-	
-	    
+
+  }
 	
 }
 
