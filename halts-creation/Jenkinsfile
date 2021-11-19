@@ -75,7 +75,6 @@ node{
 
 	}
 	stage('SSH transfer and restart') {
-		{
 
 			remoteUser=paramsMap.get('remoteUser')
 				remoteHost=paramsMap.get('remoteHost')
