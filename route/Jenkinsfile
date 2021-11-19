@@ -52,7 +52,7 @@ node{
 		if(paramsMap.get("CheckoutNeeded") && opType!='shutdown')
 		{
 
-			checkout([$class: 'GitSCM',branches: [[name: paramsMap.get("branch") ]],userRemoteConfigs: [[credentialsId: 'deployjava', url: 'git@gitlab.com:elogistjavaprojects/routes.git']]])
+			Checkout([$class: 'GitSCM',branches: [[name: paramsMap.get("branch") ]],userRemoteConfigs: [[credentialsId: 'deployjava', url: 'git@gitlab.com:elogistjavaprojects/routes.git']]])
 
 
 		}
