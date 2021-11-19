@@ -87,7 +87,8 @@ node {
 	}
 	
 	stage('SSH transfer and restart') {
-	
+		if(opType!='none')
+		{			
 
 		//Later, there will be a single location, with different params.
 		//Can use a flag for multiple or single copies. 
@@ -161,7 +162,7 @@ error ('invalid typeOfOperation!')
 				}
 			}	
 				
-		
+		}
 	}
 }
 
