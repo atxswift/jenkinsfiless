@@ -90,6 +90,7 @@ node{
 
 			if(opType=='restart')
 			{	
+				echo "Here"	
 				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${instanceID}/production_restart.sh ${paramsMap.get('serverPort')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('logLevel')} ${instanceID} ${paramsMap.get('logRoot') ${paramsMap.get('cloudConfigUri')}}"
 			}
 			else if (opType=='start')
@@ -106,9 +107,7 @@ node{
 				error ('invalid typeOfOperation!')
 			}
 
-
 			echo sshRunCommand
-
 
 			sshagent(credentials : ['deployjava']) {
 				//todo add checks for return values here
@@ -132,7 +131,6 @@ node{
 						echo err.getMessage()
 
 					}
-
 			}
 	}
 
