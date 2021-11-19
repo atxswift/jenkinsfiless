@@ -94,6 +94,7 @@ node{
 
 				rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress build/libs/ ${remoteUser}@${remoteHost}:${baseDir}/${consumerNumber}"
 				echo rsyncCommand
+				opType=paramsMap.get('typeOfOperation')
 
 
 
