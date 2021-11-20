@@ -1,13 +1,15 @@
 node{
 	//todo - Store port to Device type in map, after all bugs are fixed. 
 
-	def stringParams=['appName','branch','remoteUser','remoteHost','logRoot','profile','loglevel','instanceID','cloudConfigUri']
+	def stringParams=['appName','branch','remoteUser','remoteHost','logRoot','profile','loglevel','instanceID','cloudConfigUri','typeOfOperation']
 		def intParams=['port','sizeOfLogFiles','numberOfLogFiles']
 		//These are parameters whose values are integers, not necessarily which are integer params in jenkins 
 
-		def boolParams=['checkoutNeeded','copyToServer']
+		def boolParams=['buildNeeded','copyToServer']
 
 		def paramsMap=[:] 
+		def opType=''
+
 
 
 		stage ('Parse Params')
@@ -48,13 +50,15 @@ node{
 			}
 
 
+			opType=paramsMap.get('typeOfOperation')
+
 			echo paramsMap.toString()
 
 		}
 
 	stage ('Checkout'){
 
-		if(paramsMap.get("checkoutNeeded"))
+		if(paramsMap.get("buildNeeded")&& opType!='shutdown')
 		{
 
 			checkout([$class: 'GitSCM',branches: [[name: paramsMap.get("branch") ]],userRemoteConfigs: [[credentialsId: 'deployjava', url: 'git@gitlab.com:axestrack_bankend/kafka_producer_microservice.git']]])
@@ -64,7 +68,7 @@ node{
 	}
 
 	stage ('Build'){
-		    if(paramsMap.get("checkoutNeeded"))
+		    if(paramsMap.get("buildNeeded") && opType!='shutdown')
                 {
 
 		echo "Building consumer..."
@@ -83,14 +87,12 @@ node{
 		}
 	}
 	stage('SSH transfer and restart') {
-	     if(paramsMap.get('copyToServer'))
-		{
 
-		remoteUser=paramsMap.get('remoteUser')
+			remoteUser=paramsMap.get('remoteUser')
 			remoteHost=paramsMap.get('remoteHost')
 			baseDir=paramsMap.get('appName');
 
-		sshLsCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} ls -l ${baseDir}"
+			sshLsCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} ls -l ${baseDir}"
 
 			echo sshLsCommand
 
@@ -102,40 +104,49 @@ node{
 			rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress build/libs/ ${remoteUser}@${remoteHost}:${baseDir}"
 			echo rsyncCommand
 
-			sshRestartCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/production_restart.sh ${paramsMap.get('port')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('loglevel')} ${paramsMap.get('instanceID')} ${paramsMap.get('logRoot')} ${paramsMap.get('cloudConfigUri')} "
+			if(opType=='restart')
+                        {
+				sshRestartCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/production_restart.sh ${paramsMap.get('port')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('loglevel')} ${paramsMap.get('instanceID')} ${paramsMap.get('logRoot')} ${paramsMap.get('cloudConfigUri')} " 
+			}
+			else if(opType=='start')
+                        {
+                                sshRestartCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/production_start.sh ${paramsMap.get('port')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('loglevel')} ${paramsMap.get('instanceID')} ${paramsMap.get('logRoot')} ${paramsMap.get('cloudConfigUri')} "
+                        }
+			 else if(opType=='shutdown')
+                        {
+                                sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${port}/production_shutdown.sh ${logRoot} ${port}"
+                        }
+                        else if (optype!='none')
+			{
+                                error ('invalid typeOfOperation!')
+                        }
+
 			echo sshRestartCommand
 
+
 			//todo move the mkdir and ls command to outside the try block. 
-			try{
 				sshagent(credentials : ['deployjava']) {
+
 					//todo add checks for return values here
 					//make directory if it doesnt exist
+					if(opType!='shutdown' && paramsMap.get('copyToServer'))
+                                        {
+
 						sh mkdirCommand
 						//This is a test command
 						sh sshLsCommand
 						//This is the actual copy command
 						sh rsyncCommand
+					}
+						
+					if (opType!='none')
+					{
 						sh sshRestartCommand
+					}
 
 				}
 
-
-			}
-
-			catch(err)
-			{
-				echo "This is a false alarm, because we're waiting 30 secs to see the logs... We're using this workaround until we figure out how to set timeout for "
-				echo err.getMessage()
-			}
-
 		}
-
-		
-
-            }
-
-
-   
-
+	     
 }
 
