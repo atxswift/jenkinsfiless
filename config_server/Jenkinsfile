@@ -93,11 +93,11 @@ node{
 			remoteHost=paramsMap.get('remoteHost')
 			baseDir=paramsMap.get('appName');
 
-			sshLsCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} ls -l ${baseDir}"
+			sshLsCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} ls -l ${baseDir}/${paramsMap.get('instanceID')}"
 
 			echo sshLsCommand
 
-			mkdirCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} mkdir -p ${baseDir}"
+			mkdirCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} mkdir -p ${baseDir}/${paramsMap.get('instanceID')}"
 			echo mkdirCommand
 
 
