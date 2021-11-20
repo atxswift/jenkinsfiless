@@ -106,11 +106,11 @@ node{
 
 			if(opType=='restart')
                         {
-				sshRestartCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/production_restart.sh ${paramsMap.get('serverPort')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('logLevel')} ${paramsMap.get('instanceID')} ${paramsMap.get('logRoot')} ${paramsMap.get('cloudConfigUri')} " 
+				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/production_restart.sh ${paramsMap.get('serverPort')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('logLevel')} ${paramsMap.get('instanceID')} ${paramsMap.get('logRoot')} ${paramsMap.get('cloudConfigUri')} " 
 			}
 			else if(opType=='start')
                         {
-                                sshRestartCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/production_start.sh ${paramsMap.get('serverPort')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('logLevel')} ${paramsMap.get('instanceID')} ${paramsMap.get('logRoot')} ${paramsMap.get('cloudConfigUri')} "
+                                sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/production_start.sh ${paramsMap.get('serverPort')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('logLevel')} ${paramsMap.get('instanceID')} ${paramsMap.get('logRoot')} ${paramsMap.get('cloudConfigUri')} "
                         }
 			 else if(opType=='shutdown')
                         {
@@ -121,7 +121,7 @@ node{
                                 error ('invalid typeOfOperation!')
                         }
 
-			echo sshRestartCommand
+			echo sshRunCommand
 
 
 			//todo move the mkdir and ls command to outside the try block. 
@@ -141,7 +141,7 @@ node{
 						
 					if (opType!='none')
 					{
-						sh sshRestartCommand
+						sh sshRunCommand
 					}
 
 				}
