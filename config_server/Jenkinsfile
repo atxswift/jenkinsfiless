@@ -122,7 +122,7 @@ node{
                                 error ('invalid typeOfOperation!')
                         }
 
-			echo sshRestartCommand
+			echo sshRunCommand
 
 
 			//todo move the mkdir and ls command to outside the try block. 
