@@ -114,7 +114,7 @@ node{
                         }
 			 else if(opType=='shutdown')
                         {
-                                sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${serverPort}/production_shutdown.sh ${logRoot} ${serverPort}"
+                                sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${paramsMap.get('instanceID')}/production_shutdown.sh ${logRoot} ${serverPort}"
                         }
                         else if (optype!='none')
 			{
