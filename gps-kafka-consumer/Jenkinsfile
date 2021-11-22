@@ -81,7 +81,7 @@ node{
 			baseDir=paramsMap.get('appName')
 			instanceID=paramsMap.get('instanceID');
 
-		sshLsCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} ls -l ${baseDir}/${instanceID}"
+			sshLsCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} ls -l ${baseDir}/${instanceID}"
 			echo sshLsCommand
 			mkdirCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} mkdir -p ${baseDir}/${instanceID}"
 			echo mkdirCommand
@@ -102,7 +102,7 @@ node{
 			}
 			else if(opType=='shutdown')
 			{
-				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${port}/production_shutdown.sh ${logRoot} ${port}"
+				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${instanceID}/production_shutdown.sh ${logRoot} ${instanceID}"
 			}
 			else{
 				error ('invalid typeOfOperation!')
@@ -130,7 +130,6 @@ node{
 					{
 						echo "This is a false alarm, because we're waiting 30 secs to see the logs... We're using this workaround until we figure out how to set timeout for "
 						echo err.getMessage()
-
 					}
 			}
 		}
