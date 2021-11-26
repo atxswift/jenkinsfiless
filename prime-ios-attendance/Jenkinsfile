@@ -1,4 +1,4 @@
-node{
+node{itrm
 	//todo - Store port to Device type in map, after all bugs are fixed. 
 	def listenerPorts=[];
 	def remoteHost
@@ -86,7 +86,7 @@ node{
 		 mkdirCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} mkdir -p ${remoteDir}"
                  echo mkdirCommand
 
-		 rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress itrm/ ${remoteUser}@${remoteHost}:${remoteDir}"
+		 rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress dist/attendanceModule/ ${remoteUser}@${remoteHost}:${remoteDir}"
                  echo rsyncCommand
 
                           sshagent(credentials : ['deployjava']) {
