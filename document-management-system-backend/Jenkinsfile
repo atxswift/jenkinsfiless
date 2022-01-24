@@ -61,7 +61,7 @@ node{
 		if(paramsMap.get("buildNeeded")&& opType!='shutdown')
 		{
 
-			checkout([$class: 'GitSCM',branches: [[name: paramsMap.get("branch") ]],userRemoteConfigs: [[credentialsId: 'deployjava', url: 'git@gitlab.com:axestrack_devops/jenkinsfiles.git']]])
+			checkout([$class: 'GitSCM',branches: [[name: paramsMap.get("branch") ]],userRemoteConfigs: [[credentialsId: 'deployjava', url: 'git@gitlab.com:prime-java/document-management-system.git']]])
 
 
 		}
