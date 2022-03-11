@@ -122,7 +122,7 @@ node{
 			echo sshRunCommand
 
 
-			//todo move the mkdir and ls command to outside the try block. 
+			todo move the mkdir and ls command to outside the try block. 
 				sshagent(credentials : ['deployjava']) {
 
 					//todo add checks for return values here
