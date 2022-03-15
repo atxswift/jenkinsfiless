@@ -18,9 +18,9 @@ node{
 				echo this.params.getClass().toString()
 
 
-				//		this.params.each { key,val ->
-				//			echo key+" "+val
-				//		}
+						this.params.each { key,val ->
+							echo key+" "+val
+						}
 
 				stringParams.each {key->
 					val=this.params.get(key)
