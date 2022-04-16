@@ -102,7 +102,7 @@ node{
 			}
 			else if(opType=='shutdown')
 			{
-				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${instanceID}/production_shutdown.sh ${logRoot} ${instanceID}"
+				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${instanceID}/production_shutdown.sh ${paramsMap.get('serverPort')} ${logRoot} ${instanceID}"
 			}
 			else{
 				error ('invalid typeOfOperation!')
