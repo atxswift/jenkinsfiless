@@ -2,7 +2,7 @@ node{
 
 	def paramsMap=[:] 
 		def stringParams=['appName','branch','remoteUser','remoteHost','logRoot','profile','logLevel','instanceID','cloudConfigUri','typeOfOperation']
-		def intParams=['serverPort','sizeOfLogFiles','numberOfLogFiles']
+		def intParams=['serverPort','sizeOfLogFiles','numberOfLogFiles','gracefulShutdownTimeout']
 		def boolParams=['buildNeeded','copyToServer']
 
 		def opType=''
@@ -92,7 +92,7 @@ node{
 
 			if(opType=='restart')
 			{	
-				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${instanceID}/production_restart.sh ${paramsMap.get('serverPort')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('logLevel')} ${instanceID} ${paramsMap.get('logRoot')} ${paramsMap.get('cloudConfigUri')}"
+				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${instanceID}/production_restart.sh ${paramsMap.get('serverPort')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('logLevel')} ${instanceID} ${paramsMap.get('logRoot')} ${paramsMap.get('cloudConfigUri')} ${paramsMap.get('gracefulShutdownTimeout')}"
 			}
 			else if (opType=='start')
 			{
@@ -102,7 +102,7 @@ node{
 			}
 			else if(opType=='shutdown')
 			{
-				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${instanceID}/production_shutdown.sh ${paramsMap.get('serverPort')} ${logRoot} ${instanceID}"
+				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${instanceID}/production_shutdown.sh ${paramsMap.get('serverPort')} ${logRoot} ${instanceID} ${paramsMap.get('gracefulShutdownTimeout')}" 
 			}
 			else{
 				error ('invalid typeOfOperation!')
