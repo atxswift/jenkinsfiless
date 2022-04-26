@@ -123,7 +123,7 @@ node {
              else if (opType=='start')
             {
                   
-			sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${port}/production_start.sh ${serverPort} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')}  ${paramsMap.get('logLevel')}  ${port}  ${logRoot} ${paramsMap.get('cloudConfigUri')}"
+			sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${port}/production_start.sh ${serverPort} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')}  ${paramsMap.get('logLevel')}  ${port}  ${paramsMap.get('logRawDataToCassandra')} ${logRoot} ${paramsMap.get('cloudConfigUri')}"
              
             }
 else if(opType=='shutdown')
