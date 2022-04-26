@@ -155,7 +155,7 @@ error ('invalid typeOfOperation!')
 				}
 				catch(err)
 				{
-					echo "This is a false alarm, because we're waiting 30 secs to see the logs... We're using this workaround until we figure out how to set timeout for "
+					echo "Error while running start/restart/shutdown "
 					echo err.getMessage()
 				}
 
