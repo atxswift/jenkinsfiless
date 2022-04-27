@@ -1,7 +1,7 @@
 node{
 	//todo - Store port to Device type in map, after all bugs are fixed. 
 
-	def stringParams=['appName','branch','remoteUser','remoteHost','logRoot','logLevel','instanceID','typeOfOperation']
+	def stringParams=['appName','branch','remoteUser','remoteHost','logRoot','logLevel','instanceID','typeOfOperation','sshCredentials']
 
 		def intParams=['serverPort','sizeOfLogFiles','numberOfLogFiles']
 		//These are parameters whose values are integers, not necessarily which are integer params in jenkins 
@@ -62,7 +62,7 @@ node{
 		if(paramsMap.get("buildNeeded")&& opType!='shutdown')
 		{
 
-			checkout([$class: 'GitSCM',branches: [[name: paramsMap.get("branch") ]],userRemoteConfigs: [[credentialsId: 'deployjava', url: 'git@gitlab.com:axestrack_bankend/config-server.git']]])
+			checkout([$class: 'GitSCM',branches: [[name: paramsMap.get("branch") ]],userRemoteConfigs: [[credentialsId: 'Axestrack_Gitlab_Creds', url: 'git@gitlab.com:axestrack_devops/production-configs.git']]])
 
 
 		}
@@ -126,7 +126,7 @@ node{
 
 
 			//todo move the mkdir and ls command to outside the try block. 
-				sshagent(credentials : ['deployjava']) {
+				sshagent(credentials : [paramsMap.get('sshCredentials')]) {
 
 					//todo add checks for return values here
 					//make directory if it doesnt exist
