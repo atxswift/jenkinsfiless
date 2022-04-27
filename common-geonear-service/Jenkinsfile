@@ -107,7 +107,7 @@ node{
 
 			echo sshRunCommand
 
-			sshagent(credentials : paramsMap.get('sshCredentials')) {
+			sshagent(credentials : [paramsMap.get('sshCredentials')]) {
 				//todo add checks for return values here
 				//make directory if it doesnt exist
 					if(opType!='shutdown' && paramsMap.get('copyToServer'))
