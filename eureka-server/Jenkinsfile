@@ -1,7 +1,7 @@
 node{
 	//todo - Store port to Device type in map, after all bugs are fixed. 
 
-	def stringParams=['appName','branch','remoteUser','remoteHost','logRoot','profile','logLevel','instanceID','cloudConfigUri','typeOfOperation']
+	def stringParams=['appName','branch','remoteUser','remoteHost','logRoot','profile','logLevel','instanceID','cloudConfigUri','typeOfOperation','sshCredentials']
 		def intParams=['serverPort','sizeOfLogFiles','numberOfLogFiles']
 		//These are parameters whose values are integers, not necessarily which are integer params in jenkins 
 
@@ -125,7 +125,7 @@ node{
 
 
 			//todo move the mkdir and ls command to outside the try block. 
-				sshagent(credentials : ['deployjava']) {
+				sshagent(credentials : [paramsMap.get('sshCredentials')]) {
 
 					//todo add checks for return values here
 					//make directory if it doesnt exist
