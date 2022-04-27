@@ -1,7 +1,7 @@
 node{
 
 	def paramsMap=[:] 
-		def stringParams=['appName','branch','remoteUser','remoteHost','logRoot','profile','logLevel','instanceID','cloudConfigUri','typeOfOperation']
+		def stringParams=['appName','branch','remoteUser','remoteHost','logRoot','profile','logLevel','instanceID','cloudConfigUri','typeOfOperation','sshCredentials']
 		def intParams=['serverPort','sizeOfLogFiles','numberOfLogFiles']
 		def boolParams=['buildNeeded','copyToServer']
 
@@ -49,7 +49,7 @@ node{
 
 		if(paramsMap.get("buildNeeded")&& opType!='shutdown')
 		{
-			checkout([$class: 'GitSCM',branches: [[name: paramsMap.get("branch") ]],userRemoteConfigs: [[credentialsId: 'deployjava', url: 'git@gitlab.com:elogistjavaprojects/common_geonear_service.git']]])
+			checkout([$class: 'GitSCM',branches: [[name: paramsMap.get("branch") ]],userRemoteConfigs: [[credentialsId: 'Axestrack_Gitlab_Creds', url: 'git@gitlab.com:elogistjavaprojects/common_geonear_service.git']]])
 		}
 	}
 
@@ -107,7 +107,7 @@ node{
 
 			echo sshRunCommand
 
-			sshagent(credentials : ['deployjava']) {
+			sshagent(credentials : paramsMap.get('sshCredentials')) {
 				//todo add checks for return values here
 				//make directory if it doesnt exist
 					if(opType!='shutdown' && paramsMap.get('copyToServer'))
