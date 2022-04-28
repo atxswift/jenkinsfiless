@@ -1,25 +1,6 @@
 node{
-		
-		def buildParameterString=this.params.get('buildParameters')
-		if(buildParameterString==null)
-		{
-			error('buildParameters is null')
-		}
 
-
-		def buildParams =''
-		       try{
-		       	       buildParams=new groovy.json.JsonSlurper().parseText(this.params.get('buildParameters'))
-			       assert buildParams instanceof Map
-
-		       }
-		catch(err)
-		
-		{
-			error('got error'+err.toString()+'while parsing map')					
-		}
-			
-		def paramsMap=[:] 
+	def paramsMap=[:] 
 		def stringParams=['appDirectory','branch','remoteUser','remoteHost','logRoot','profile','logLevel','instanceID','cloudConfigUri','cloudConfigUser','cloudConfigPassword','typeOfOperation','sshCredentials']
 		def intParams=['serverPort','sizeOfLogFiles','numberOfLogFiles','jmxPort','killTimeout']
 		def boolParams=['buildNeeded','copyToServer']
@@ -28,11 +9,11 @@ node{
 
 		stage ('Parse Params')
 		{
-			echo buildParams.toString()
-				echo buildParams.getClass().toString()
+			echo this.params.toString()
+				echo this.params.getClass().toString()
 
 				stringParams.each {key->
-					val=buildParams.get(key)
+					val=this.params.get(key)
 						if (val==null)
 							error('Got null value for '+key )
 								paramsMap.put(key,val.trim())
@@ -40,7 +21,7 @@ node{
 				}
 
 			intParams.each {key->
-				val=buildParams.get(key)
+				val=this.params.get(key)
 					if (val==null)
 						error('Got null value for '+key )
 					else if (!val.trim().isInteger())
@@ -52,7 +33,7 @@ node{
 			}
 
 			boolParams.each {key->
-				val=buildParams.get(key)
+				val=this.params.get(key)
 					if (val==null)
 						error('Got null value for '+key )
 							paramsMap.put(key,val.toBoolean())
