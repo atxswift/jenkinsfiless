@@ -9,7 +9,7 @@ node{
 
 		def buildParams =''
 		       try{
-		       	       buildParams=new groovy.json.JsonSlurper().parseText(this.params.get('buildParameters'))
+		       	       buildParams=new groovy.json.JsonSlurperClassic().parseText(buildParameterString)
 			       assert buildParams instanceof Map
 
 		       }
