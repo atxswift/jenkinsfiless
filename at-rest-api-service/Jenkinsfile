@@ -49,7 +49,7 @@ node{
 
 		if(paramsMap.get("buildNeeded")&& opType!='shutdown')
 		{
-			checkout([$class: 'GitSCM',branches: [[name: paramsMap.get("branch") ]],userRemoteConfigs: [[credentialsId: 'Axestrack_Gitlab_Creds', url: 'git@gitlab.com/axestrack_bankend/axestrack_rest_api']]])
+			checkout([$class: 'GitSCM',branches: [[name: paramsMap.get("branch") ]],userRemoteConfigs: [[credentialsId: 'Axestrack_Gitlab_Creds', url: 'git@gitlab.com/axestrack_bankend/axestrack_rest_api.git']]])
 		}
 	}
 
