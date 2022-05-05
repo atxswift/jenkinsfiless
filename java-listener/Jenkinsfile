@@ -5,7 +5,7 @@ node {
 	 def paramsMap=[:]
 
 		def stringParams=['cloudConfigUri','cloudConfigUser','cloudConfigPassword','appName','branch','remoteUser','remoteHost','profile','logLevel','logRoot','listenerPorts','typeOfOperation','sshCredentials']
-		def intParams=['sizeOfLogFiles','numberOfLogFiles','killTimeout']
+		def intParams=['sizeOfLogFiles','numberOfLogFiles','killTimeout','metricPort']
 		def boolParams=['buildNeeded','copyToServer','logRawDataToCassandra']
 		def opType=''
 		stage ('Parse Params'){
@@ -116,16 +116,16 @@ node {
 
 			serverPort=port + 6000
 			jmxPort=port+5000
-			metricPort=port+4000
+	
         
             if(opType=='restart')
             {
-			sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${port}/production_restart.sh ${serverPort} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')}  ${paramsMap.get('logLevel')}  ${port} ${paramsMap.get('logRawDataToCassandra')}   ${logRoot} ${paramsMap.get('cloudConfigUri')} ${paramsMap.get('cloudConfigUser')} ${paramsMap.get('cloudConfigPassword')} ${jmxPort} ${metricPort} ${paramsMap.get('killTimeout')}"
+			sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${port}/production_restart.sh ${serverPort} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')}  ${paramsMap.get('logLevel')}  ${port} ${paramsMap.get('logRawDataToCassandra')}   ${logRoot} ${paramsMap.get('cloudConfigUri')} ${paramsMap.get('cloudConfigUser')} ${paramsMap.get('cloudConfigPassword')} ${jmxPort} ${paramsMap.get('metricPort')} ${paramsMap.get('killTimeout')}"
              }
              else if (opType=='start')
             {
                   
-			sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${port}/production_start.sh ${serverPort} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')}  ${paramsMap.get('logLevel')}  ${port}  ${paramsMap.get('logRawDataToCassandra')} ${logRoot} ${paramsMap.get('cloudConfigUri')} ${paramsMap.get('cloudConfigUser')} ${paramsMap.get('cloudConfigPassword')} ${jmxPort} ${metricPort}"
+			sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${port}/production_start.sh ${serverPort} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')}  ${paramsMap.get('logLevel')}  ${port}  ${paramsMap.get('logRawDataToCassandra')} ${logRoot} ${paramsMap.get('cloudConfigUri')} ${paramsMap.get('cloudConfigUser')} ${paramsMap.get('cloudConfigPassword')} ${jmxPort} ${paramsMap.get('metricPort')}"
              
             }
 	else if(opType=='shutdown')
