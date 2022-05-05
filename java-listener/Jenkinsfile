@@ -4,8 +4,8 @@ node {
 	def remoteHost
 	 def paramsMap=[:]
 
-		def stringParams=['cloudConfigUri','appName','branch','remoteUser','remoteHost','profile','logLevel','logRoot','listenerPorts','typeOfOperation']
-		def intParams=['sizeOfLogFiles','numberOfLogFiles']
+		def stringParams=['cloudConfigUri','cloudConfigUser','cloudConfigPassword','appName','branch','remoteUser','remoteHost','profile','logLevel','logRoot','listenerPorts','typeOfOperation','sshCredentials']
+		def intParams=['sizeOfLogFiles','numberOfLogFiles','killTimeout']
 		def boolParams=['buildNeeded','copyToServer','logRawDataToCassandra']
 		def opType=''
 		stage ('Parse Params'){
@@ -115,24 +115,26 @@ node {
 
 
 			serverPort=port + 6000
+			jmxPort=port+5000
+			metricPort=port+4000
         
             if(opType=='restart')
             {
-			sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${port}/production_restart.sh ${serverPort} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')}  ${paramsMap.get('logLevel')}  ${port} ${paramsMap.get('logRawDataToCassandra')}   ${logRoot} ${paramsMap.get('cloudConfigUri')}"
+			sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${port}/production_restart.sh ${serverPort} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')}  ${paramsMap.get('logLevel')}  ${port} ${paramsMap.get('logRawDataToCassandra')}   ${logRoot} ${paramsMap.get('cloudConfigUri')} ${paramsMap.get('cloudConfigUser')} ${paramsMap.get('cloudConfigPassword')} ${jmxPort} ${metricPort} ${paramsMap.get('killTimeout')}"
              }
              else if (opType=='start')
             {
                   
-			sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${port}/production_start.sh ${serverPort} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')}  ${paramsMap.get('logLevel')}  ${port}  ${paramsMap.get('logRawDataToCassandra')} ${logRoot} ${paramsMap.get('cloudConfigUri')}"
+			sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${port}/production_start.sh ${serverPort} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')}  ${paramsMap.get('logLevel')}  ${port}  ${paramsMap.get('logRawDataToCassandra')} ${logRoot} ${paramsMap.get('cloudConfigUri')} ${paramsMap.get('cloudConfigUser')} ${paramsMap.get('cloudConfigPassword')} ${jmxPort} ${metricPort}"
              
             }
-else if(opType=='shutdown')
-{
-sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${port}/production_shutdown.sh ${logRoot} ${port}"
-}
-else{
-error ('invalid typeOfOperation!')
-}
+	else if(opType=='shutdown')
+	{
+		sshRunCommand="ssh -o StrictHostKeyChecking=no ${remoteUser}@${remoteHost} sh ${baseDir}/${port}/production_shutdown.sh ${serverPort} ${logRoot} ${port} ${paramsMap.get('killTimeout')}"
+	}
+	else{
+		error ('invalid typeOfOperation!')
+	}
 
                 
 			echo sshRunCommand
