@@ -1,6 +1,6 @@
 node{
 
-	def stringParams=['cloudConfigUri','baseDir','branch','remoteUser','remoteHost','logRoot','profile','logLevel','typeOfOperation']
+	def stringParams=['cloudConfigUri','baseDir','branch','remoteUser','remoteHost','logRoot','profile','logLevel','typeOfOperation','sshCredentials']
 		def intParams=['serverPort','instanceID','sizeOfLogFiles','numberOfLogFiles']
 		//These are parameters whose values are integers, not necessarily which are integer params in jenkins 
 
@@ -117,7 +117,7 @@ node{
 		echo sshRunCommand
 
 
-			sshagent(credentials : ['deployjava']) {	
+			sshagent(credentials : paramsMap.get('sshCredentials')]) {	
 				//todo add checks for return values here
 				//make directory if it doesnt exist
 				if(opType!='shutdown' && paramsMap.get('copyToServer'))
