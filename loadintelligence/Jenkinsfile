@@ -105,7 +105,7 @@ node{
 
 
 			try{
-				sshagent(credentials : ['deployjava']) {
+				sshagent(credentials : [paramsMap.get('sshCredentials')]) {
 					//todo add checks for return values here
 					//make directory if it doesnt exist
 					sh mkdirCommand
