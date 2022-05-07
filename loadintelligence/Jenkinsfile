@@ -1,7 +1,7 @@
 node{
 	//todo - Store port to Device type in map, after all bugs are fixed. 
 
-	def stringParams=['cloudConfigUri','branch','remoteUser','remoteHost','logRoot','baseDir','profile','logLevel','instanceID']
+	def stringParams=['cloudConfigUri','branch','remoteUser','remoteHost','logRoot','baseDir','profile','logLevel','instanceID','sshCredentials']
 		def intParams=['serverPort','sizeOfLogFiles','numberOfLogFiles']
 		//These are parameters whose values are integers, not necessarily which are integer params in jenkins 
 
