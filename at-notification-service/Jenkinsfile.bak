@@ -1,8 +1,8 @@
 node{
 
 	def paramsMap=[:] 
-		def stringParams=['appDirectory','branch','remoteUser','remoteHost','logRoot','profile','logLevel','instanceID','cloudConfigUri','cloudConfigUser','cloudConfigPassword','typeOfOperation','sshCredentials']
-		def intParams=['serverPort','sizeOfLogFiles','numberOfLogFiles','jmxPort','killTimeout']
+		def stringParams=['appName','branch','remoteUser','remoteHost','logRoot','profile','logLevel','instanceID','cloudConfigUri','typeOfOperation']
+		def intParams=['serverPort','sizeOfLogFiles','numberOfLogFiles','gracefulShutdownTimeout']
 		def boolParams=['buildNeeded','copyToServer']
 
 		def opType=''
@@ -49,14 +49,17 @@ node{
 
 		if(paramsMap.get("buildNeeded")&& opType!='shutdown')
 		{
-			checkout([$class: 'GitSCM',branches: [[name: paramsMap.get("branch") ]],userRemoteConfigs: [[credentialsId: 'Axestrack_Gitlab_Creds', url: 'git@gitlab.com:axestrack_bankend/at-notification-service.git']]])
+
+			checkout([$class: 'GitSCM',branches: [[name: paramsMap.get("branch") ]],userRemoteConfigs: [[credentialsId: 'deployjava', url: 'git@gitlab.com:axestrack_bankend/at-notification-service.git']]])
+
+
 		}
 	}
 
 	stage ('Build'){
 		if(paramsMap.get("buildNeeded")&& opType!='shutdown')
 		{		
-			echo "Building project..."
+			echo "Building consumer..."
 				sh "ls -la ${pwd()}"
 				sh "ls -la ."
 				sh "pwd"
@@ -75,7 +78,7 @@ node{
 		{
 		remoteUser=paramsMap.get('remoteUser')
 			remoteHost=paramsMap.get('remoteHost')
-			baseDir=paramsMap.get('appDirectory')
+			baseDir=paramsMap.get('appName')
 			instanceID=paramsMap.get('instanceID');
 
 			sshLsCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} ls -l ${baseDir}/${instanceID}"
@@ -89,17 +92,17 @@ node{
 
 			if(opType=='restart')
 			{	
-				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${instanceID}/production_restart.sh ${paramsMap.get('serverPort')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('logLevel')} ${instanceID} ${paramsMap.get('logRoot')} ${paramsMap.get('cloudConfigUri')} ${paramsMap.get('cloudConfigUser')} ${paramsMap.get('cloudConfigPassword')} ${paramsMap.get('jmxPort')} ${paramsMap.get('killTimeout')}"
+				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${instanceID}/production_restart.sh ${paramsMap.get('serverPort')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('logLevel')} ${instanceID} ${paramsMap.get('logRoot')} ${paramsMap.get('cloudConfigUri')} ${paramsMap.get('gracefulShutdownTimeout')}"
 			}
 			else if (opType=='start')
 			{
 
-				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${instanceID}/production_start.sh ${paramsMap.get('serverPort')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('logLevel')} ${instanceID} ${paramsMap.get('logRoot')} ${paramsMap.get('cloudConfigUri')} ${paramsMap.get('cloudConfigUser')} ${paramsMap.get('cloudConfigPassword')} ${paramsMap.get('jmxPort')} ${paramsMap.get('killTimeout')}"
+				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${instanceID}/production_start.sh ${paramsMap.get('serverPort')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('logLevel')} ${instanceID} ${paramsMap.get('logRoot')} ${paramsMap.get('cloudConfigUri')}"
 
 			}
 			else if(opType=='shutdown')
 			{
-				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${instanceID}/production_shutdown.sh ${paramsMap.get('serverPort')} ${logRoot} ${instanceID} ${paramsMap.get('killTimeout')}"
+				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${instanceID}/production_shutdown.sh ${paramsMap.get('serverPort')} ${logRoot} ${instanceID} ${paramsMap.get('gracefulShutdownTimeout')}" 
 			}
 			else{
 				error ('invalid typeOfOperation!')
@@ -107,7 +110,7 @@ node{
 
 			echo sshRunCommand
 
-			sshagent(credentials : [paramsMap.get('sshCredentials')]) {
+			sshagent(credentials : ['deployjava']) {
 				//todo add checks for return values here
 				//make directory if it doesnt exist
 					if(opType!='shutdown' && paramsMap.get('copyToServer'))
