@@ -1,0 +1,105 @@
+node{
+	//todo - Store port to Device type in map, after all bugs are fixed. 
+	def listenerPorts=[];
+	def remoteHost
+	 def paramsMap=[:]
+
+		def stringParams=['appName','branch','remoteUser','remoteHost','profile','baseDir']
+		def intParams=[]
+		def boolParams=['buildNeeded','copyToServer']
+
+
+		stage ('Parse Params'){
+
+			echo this.params.toString()
+			echo this.params.getClass().toString()
+
+			stringParams.each {key->
+				val=this.params.get(key)
+				if (val==null)
+					error('Got null value for '+key )
+					paramsMap.put(key,val.trim())
+				}
+
+			intParams.each {key->
+				val=this.params.get(key)
+				if (val==null)
+					error('Got null value for '+key )
+					else if (!val.trim().isInteger())
+					{
+						error('Got non-integer value for '+key + ":"+val.trim() )
+					}
+					paramsMap.put(key,val.trim())
+				}
+
+			boolParams.each {key->
+				val=this.params.get(key)
+				if (val==null)
+					error('Got null value for '+key )
+				paramsMap.put(key,val.toBoolean())
+			}
+
+
+		}
+
+
+	stage ('Checkout'){
+		if(paramsMap.get('buildNeeded'))
+		{
+			checkout([$class: 'GitSCM',
+					branches: [[name: paramsMap.get("branch")]],
+					userRemoteConfigs: [[credentialsId: 'Axestrack_Gitlab_Creds',
+					url: 'git@gitlab.com:prime-angular/prime-chat-angular.git']]])
+		}
+	}
+
+	stage ('Build'){
+		if(paramsMap.get('buildNeeded')){
+		echo "Building prime frontend..."
+		sh "ls -la ${pwd()}"
+		sh "ls -la ."
+		sh "pwd"
+
+        	profile=paramsMap.get('profile')    
+        	echo profile
+		command="sh ./build.sh " + profile 
+		retVal=sh(returnStatus: true,script:command)
+		echo "Build returned ${retVal.toString()}"
+		if (retVal!=0)
+		{
+			error("Build failed with return value ${retVal.toString()}") 
+		}	
+		}
+		echo "Finished building...."
+	}
+	
+	stage('SSH transfer and restart') {
+		 if(paramsMap.get('copyToServer'))
+                {
+
+		remoteUser=paramsMap.get('remoteUser')
+                remoteHost=paramsMap.get('remoteHost')
+		remoteDir=paramsMap.get('baseDir')+'/'+paramsMap.get('appName')
+		sshLsCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} ls -l ${remoteDir}"
+                echo sshLsCommand
+
+		 mkdirCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} mkdir -p ${remoteDir}"
+                 echo mkdirCommand
+
+		 rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress dist/wa-clone/ ${remoteUser}@${remoteHost}:${remoteDir}"
+                 echo rsyncCommand
+
+                          sshagent(credentials : ['deployjava']) {
+
+                                sh mkdirCommand
+                                //This is a test command
+                                sh sshLsCommand
+                                //This is the actual copy command
+                                sh rsyncCommand
+                        }
+
+		}
+		
+	}
+}
+
