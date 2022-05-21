@@ -58,9 +58,9 @@ node{
 				sh "pwd"
 				
 				username=paramsMap.get('repoUsername')	
-				password=paramsMap.get('password')	
+				password=paramsMap.get('repoPassword')	
 				
-				retVal=sh(returnStatus: true,script:"sh ./build.sh $username $password ")
+				retVal=sh(returnStatus: true,script:"sh ./build.sh $username $password")
 				echo "Build returned ${retVal.toString()}"
 				if (retVal!=0)
 				{
