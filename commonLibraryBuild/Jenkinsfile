@@ -1,0 +1,77 @@
+node{
+
+	def paramsMap=[:] 
+		def stringParams=['repoLocation','branch','repoUsername','repoPassword']
+		def intParams=[]
+		def boolParams=[]
+
+		def opType=''
+
+		stage ('Parse Params')
+		{
+			echo this.params.toString()
+				echo this.params.getClass().toString()
+
+				stringParams.each {key->
+					val=this.params.get(key)
+						if (val==null)
+							error('Got null value for '+key )
+								paramsMap.put(key,val.trim())
+
+				}
+
+			intParams.each {key->
+				val=this.params.get(key)
+					if (val==null)
+						error('Got null value for '+key )
+					else if (!val.trim().isInteger())
+					{
+						error('Got non-integer value for '+key + ":"+val.trim() )   
+					}
+				paramsMap.put(key,val.trim())
+
+			}
+
+			boolParams.each {key->
+				val=this.params.get(key)
+					if (val==null)
+						error('Got null value for '+key )
+							paramsMap.put(key,val.toBoolean())
+			}
+
+
+			opType=paramsMap.get('typeOfOperation')
+				echo paramsMap.toString()
+
+		}
+
+	stage ('Checkout'){
+		url='git@gitlab.com:'+paramsMap.get('repoLocation')
+		echo url
+		checkout([$class: 'GitSCM',branches: [[name: paramsMap.get("branch") ]],userRemoteConfigs: [[credentialsId: 'Axestrack_Gitlab_Creds', url: url]]])
+	}
+
+	stage ('BuildAndPublish'){
+		if(paramsMap.get("buildNeeded")&& opType!='shutdown')
+		{		
+			echo "Building project..."
+				sh "ls -la ${pwd()}"
+				sh "ls -la ."
+				sh "pwd"
+				
+				username=paramsMap.get('repoUsername')	
+				password=paramsMap.get('password')	
+				
+				retVal=sh(returnStatus: true,script:"sh ./build.sh $username $password ")
+				echo "Build returned ${retVal.toString()}"
+				if (retVal!=0)
+				{
+					error("Build failed with return value ${retVal.toString()}") 
+				}	
+			echo "Finished building...."
+		}
+	}
+
+
+}
+
