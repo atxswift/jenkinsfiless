@@ -52,8 +52,6 @@ node{
 	}
 
 	stage ('BuildAndPublish'){
-		if(paramsMap.get("buildNeeded")&& opType!='shutdown')
-		{		
 			echo "Building project..."
 				sh "ls -la ${pwd()}"
 				sh "ls -la ."
@@ -69,7 +67,6 @@ node{
 					error("Build failed with return value ${retVal.toString()}") 
 				}	
 			echo "Finished building...."
-		}
 	}
 
 
