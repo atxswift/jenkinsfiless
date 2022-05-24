@@ -115,7 +115,7 @@ node {
 
 
 			serverPort=port + 6000
-			jmxPort=port+5000
+			jmxPort=port+4000
 	
         
             if(opType=='restart')
