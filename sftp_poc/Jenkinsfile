@@ -1,26 +1,16 @@
 node{
-	//todo - Store port to Device type in map, after all bugs are fixed. 
 
-	def stringParams=['appName','branch','remoteUser','remoteHost','logRoot','profile','logLevel','instanceID','cloudConfigUri','typeOfOperation']
-		def intParams=['serverPort','sizeOfLogFiles','numberOfLogFiles']
-		//These are parameters whose values are integers, not necessarily which are integer params in jenkins 
-
+	def paramsMap=[:] 
+		def stringParams=['appDirectory','branch','remoteUser','remoteHost','logRoot','profile','logLevel','instanceID','cloudConfigUri','cloudConfigUser','cloudConfigPassword','typeOfOperation','sshCredentials']
+		def intParams=['serverPort','sizeOfLogFiles','numberOfLogFiles','jmxPort','killTimeout']
 		def boolParams=['buildNeeded','copyToServer']
 
-		def paramsMap=[:] 
 		def opType=''
-
-
 
 		stage ('Parse Params')
 		{
 			echo this.params.toString()
 				echo this.params.getClass().toString()
-
-
-				//		this.params.each { key,val ->
-				//			echo key+" "+val
-				//		}
 
 				stringParams.each {key->
 					val=this.params.get(key)
@@ -51,8 +41,7 @@ node{
 
 
 			opType=paramsMap.get('typeOfOperation')
-
-			echo paramsMap.toString()
+				echo paramsMap.toString()
 
 		}
 
@@ -60,93 +49,88 @@ node{
 
 		if(paramsMap.get("buildNeeded")&& opType!='shutdown')
 		{
-
-			checkout([$class: 'GitSCM',branches: [[name: paramsMap.get("branch") ]],userRemoteConfigs: [[credentialsId: 'deployjava', url: 'git@gitlab.com:elogistjavaprojects/sftp_poc.git']]])
-
-
+			checkout([$class: 'GitSCM',branches: [[name: paramsMap.get("branch") ]],userRemoteConfigs: [[credentialsId: 'Axestrack_Gitlab_Creds', url: 'git@gitlab.com:elogistjavaprojects/sftp_poc.git']]])
 		}
 	}
 
 	stage ('Build'){
-		    if(paramsMap.get("buildNeeded") && opType!='shutdown')
-                {
+		if(paramsMap.get("buildNeeded")&& opType!='shutdown')
+		{		
+			echo "Building project..."
+				sh "ls -la ${pwd()}"
+				sh "ls -la ."
+				sh "pwd"
 
-		echo "Building consumer..."
-			sh "ls -la ${pwd()}"
-			sh "ls -la ."
-			sh "pwd"
-
-			retVal=sh(returnStatus: true,script:"sh ./build.sh")
-			echo "Build returned ${retVal.toString()}"
-			if (retVal!=0)
-						{
-							error("Build failed with return value ${retVal.toString()}") 
-						}	
-				echo "Finished building...."
-
+				retVal=sh(returnStatus: true,script:"sh ./build.sh")
+				echo "Build returned ${retVal.toString()}"
+				if (retVal!=0)
+				{
+					error("Build failed with return value ${retVal.toString()}") 
+				}	
+			echo "Finished building...."
 		}
 	}
 	stage('SSH transfer and restart') {
-
-			remoteUser=paramsMap.get('remoteUser')
+		if(opType!='none')
+		{
+		remoteUser=paramsMap.get('remoteUser')
 			remoteHost=paramsMap.get('remoteHost')
-			baseDir=paramsMap.get('appName');
+			baseDir=paramsMap.get('appDirectory')
+			instanceID=paramsMap.get('instanceID');
 
-			sshLsCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} ls -l ${baseDir}/${paramsMap.get('instanceID')}"
-
+			sshLsCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} ls -l ${baseDir}/${instanceID}"
 			echo sshLsCommand
-
-			mkdirCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} mkdir -p ${baseDir}/${paramsMap.get('instanceID')}"
+			mkdirCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} mkdir -p ${baseDir}/${instanceID}"
 			echo mkdirCommand
-
-
-
-			rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress build/libs/ ${remoteUser}@${remoteHost}:${baseDir}/${paramsMap.get('instanceID')}"
+			rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress build/libs/ ${remoteUser}@${remoteHost}:${baseDir}/${instanceID}"
 			echo rsyncCommand
 
+
+
 			if(opType=='restart')
-                        {
-				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${paramsMap.get('instanceID')}/production_restart.sh ${paramsMap.get('serverPort')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('logLevel')} ${paramsMap.get('instanceID')} ${paramsMap.get('logRoot')} ${paramsMap.get('cloudConfigUri')} " 
+			{	
+				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${instanceID}/production_restart.sh ${paramsMap.get('serverPort')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('logLevel')} ${instanceID} ${paramsMap.get('logRoot')} ${paramsMap.get('cloudConfigUri')} ${paramsMap.get('cloudConfigUser')} ${paramsMap.get('cloudConfigPassword')} ${paramsMap.get('jmxPort')} ${paramsMap.get('killTimeout')}"
 			}
-			else if(opType=='start')
-                        {
-                                sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${paramsMap.get('instanceID')}/production_start.sh ${paramsMap.get('serverPort')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('logLevel')} ${paramsMap.get('instanceID')} ${paramsMap.get('logRoot')} ${paramsMap.get('cloudConfigUri')} "
-                        }
-			 else if(opType=='shutdown')
-                        {
-                                sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${paramsMap.get('instanceID')}/production_shutdown.sh ${logRoot} ${paramsMap.get('instanceID')}"
-                        }
-                        else if (optype!='none')
+			else if (opType=='start')
 			{
-                                error ('invalid typeOfOperation!')
-                        }
+
+				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${instanceID}/production_start.sh ${paramsMap.get('serverPort')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('logLevel')} ${instanceID} ${paramsMap.get('logRoot')} ${paramsMap.get('cloudConfigUri')} ${paramsMap.get('cloudConfigUser')} ${paramsMap.get('cloudConfigPassword')} ${paramsMap.get('jmxPort')} ${paramsMap.get('killTimeout')}"
+
+			}
+			else if(opType=='shutdown')
+			{
+				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${instanceID}/production_shutdown.sh ${paramsMap.get('serverPort')} ${logRoot} ${instanceID} ${paramsMap.get('killTimeout')}"
+			}
+			else{
+				error ('invalid typeOfOperation!')
+			}
 
 			echo sshRunCommand
 
-
-			//todo move the mkdir and ls command to outside the try block. 
-				sshagent(credentials : ['deployjava']) {
-
-					//todo add checks for return values here
-					//make directory if it doesnt exist
+			sshagent(credentials : [paramsMap.get('sshCredentials')]) {
+				//todo add checks for return values here
+				//make directory if it doesnt exist
 					if(opType!='shutdown' && paramsMap.get('copyToServer'))
-                                        {
-
+					{	
 						sh mkdirCommand
 						//This is a test command
 						sh sshLsCommand
 						//This is the actual copy command
 						sh rsyncCommand
 					}
+
+					try{
 						
-					if (opType!='none')
-					{
 						sh sshRunCommand
 					}
-
-				}
-
+					catch(err)
+					{
+						echo "This is a false alarm, because we're waiting 30 secs to see the logs... We're using this workaround until we figure out how to set timeout for "
+						echo err.getMessage()
+					}
+			}
 		}
-	     
+	}
+
 }
 
