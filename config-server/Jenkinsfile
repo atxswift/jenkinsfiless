@@ -88,7 +88,8 @@ node{
 		}
 	}
 	stage('SSH transfer and restart') {
-
+			if(opType!='none')
+			{
 			remoteUser=paramsMap.get('remoteUser')
 			remoteHost=paramsMap.get('remoteHost')
 			baseDir=paramsMap.get('appName');
@@ -117,7 +118,7 @@ node{
                         {
                                 sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${paramsMap.get('instanceID')}/production_shutdown.sh ${logRoot} ${paramsMap.get('instanceID')}"
                         }
-                        else if (optype!='none')
+                        else
 			{
                                 error ('invalid typeOfOperation!')
                         }
@@ -148,6 +149,7 @@ node{
 				}
 
 		}
+	}
 	     
 }
 
