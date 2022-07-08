@@ -72,7 +72,7 @@ node{
 		    if(paramsMap.get("buildNeeded") && opType!='shutdown')
                 {
 
-		echo "Building consumer..."
+		echo "Building project..."
 			sh "ls -la ${pwd()}"
 			sh "ls -la ."
 			sh "pwd"
