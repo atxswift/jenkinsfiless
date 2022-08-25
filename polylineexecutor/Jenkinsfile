@@ -67,7 +67,7 @@ node{
 		 mkdirCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} mkdir -p ${remoteDir}"
                  echo mkdirCommand
 
-		 rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --progress / ${remoteUser}@${remoteHost}:${remoteDir}"
+		 rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress git@gitlab.com:elogistjavaprojects/polylineexecutor.git/ ${remoteUser}@${remoteHost}:${remoteDir}"
                  echo rsyncCommand
 
                           sshagent(credentials : ['deployjava']) {
