@@ -9,7 +9,7 @@ node{
 	def remoteHost
 	 def paramsMap=[:]
 
-		def stringParams=['appName','branch','remoteUser','remoteHost','profile','baseDir']
+		def stringParams=['appName','branch','remoteUser','remoteHost','baseDir']
 		def intParams=[]
 	
 
