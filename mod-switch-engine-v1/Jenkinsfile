@@ -94,12 +94,12 @@ node{
 			else if (opType=='start')
 			{
 
-				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${instanceID}/production_start.sh ${paramsMap.get('serverPort')} ${paramsMap.get('applicationName')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('logLevel')} ${instanceID} ${paramsMap.get('logRoot')} ${paramsMap.get('cloudConfigUri')} ${paramsMap.get('cloudConfigUser')} ${paramsMap.get('cloudConfigPassword')} ${paramsMap.get('jmxPort')}"
+				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${instanceID}/production_start.sh ${paramsMap.get('serverPort')}  ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('logLevel')} ${instanceID} ${paramsMap.get('logRoot')} ${paramsMap.get('cloudConfigUri')} ${paramsMap.get('cloudConfigUser')} ${paramsMap.get('cloudConfigPassword')} ${paramsMap.get('jmxPort')} ${paramsMap.get('applicationName')}"
 
 			}
 			else if(opType=='shutdown')
 			{
-				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${instanceID}/production_shutdown.sh ${paramsMap.get('serverPort')} ${paramsMap.get('applicationName')} ${logRoot} ${instanceID} ${paramsMap.get('killTimeout')}"
+				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${instanceID}/production_shutdown.sh ${paramsMap.get('serverPort')}  ${logRoot} ${instanceID} ${paramsMap.get('killTimeout')} ${paramsMap.get('applicationName')}"
 			}
 			else{
 				error ('invalid typeOfOperation!')
