@@ -7,19 +7,7 @@ node{
 		def intParams=[]
 
 
-		stage ('Parse Params'){
-
-			echo this.params.toString()
-			echo this.params.getClass().toString()
-
-			stringParams.each {key->
-				val=this.params.get(key)
-				if (val==null)
-					error('Got null value for '+key )
-					paramsMap.put(key,val.trim())
 				}
-
-			}
 	username=`whoami`
 
 # Update the folders
