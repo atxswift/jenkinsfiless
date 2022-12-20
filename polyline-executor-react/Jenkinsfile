@@ -62,7 +62,7 @@ node{
 
         	profile=paramsMap.get('profile')    
         	echo profile
-		command="sh ./build.sh " + profile 
+		command="sh ./build.sh "  
 		retVal=sh(returnStatus: true,script:command)
 		echo "Build returned ${retVal.toString()}"
 		if (retVal!=0)
