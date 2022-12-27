@@ -1,0 +1,43 @@
+node{
+	//todo - Store port to Device type in map, after all bugs are fixed.
+	def remoteHost
+	 def paramsMap=[:]
+
+		def stringParams=['sourcefolder','destinationfolder','sourcehost','remoteUser','destinationhost']
+		def intParams=[]
+
+
+				}
+	username=`whoami`
+
+# Update the folders
+	#	sourcefolder="/disk4/backups/postgresql/data/20221121/"
+	#	destinationfolder="/var/lib/postgresql/12/main"
+
+# Update the IP here
+		remote="postgres@destinationhost"
+
+		if [ $username != "postgres" ]; then
+			echo "This script must be run as postgres" 
+				exit 1
+		else
+			echo "Source Folder: $sourcefolder"
+				echo "Destination Folder: $destination_folder"
+				rsync -rtv $sourcefolder postgres@destinationhost:$destination_folder
+				sleep 10
+				echo "* Running commands on remote host named $remote *"
+				echo
+				ssh -T $remote <<'EOL'
+# Update the Commands for Remote server
+				name="$HOSTNAME"
+				echo "Server Name for remote script is $name"
+
+
+				sudo systemctl start postgresql.service
+				EOL
+				fi
+				~ 
+
+
+
+

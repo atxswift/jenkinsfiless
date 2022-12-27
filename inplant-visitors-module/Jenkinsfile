@@ -1,7 +1,7 @@
 node{
 
 	def paramsMap=[:] 
-		def stringParams=['appDirectory','branch','key','remoteUser','remoteHost','logRoot','profile','logLevel','instanceID','cloudConfigUri','cloudConfigUser','cloudConfigPassword','typeOfOperation','sshCredentials']
+		def stringParams=['appDirectory','branch','remoteUser','remoteHost','logRoot','profile','logLevel','instanceID','cloudConfigUri','cloudConfigUser','cloudConfigPassword','typeOfOperation','sshCredentials']
 		def intParams=['serverPort','sizeOfLogFiles','numberOfLogFiles','jmxPort','killTimeout']
 		def boolParams=['buildNeeded','copyToServer']
 
@@ -49,7 +49,7 @@ node{
 
 		if(paramsMap.get("buildNeeded")&& opType!='shutdown')
 		{
-			checkout([$class: 'GitSCM',branches: [[name: paramsMap.get("branch") ]],userRemoteConfigs: [[credentialsId: 'Axestrack_Gitlab_Creds', url: 'git@gitlab.com:elogistjavaprojects/google-services.git']]])
+			checkout([$class: 'GitSCM',branches: [[name: paramsMap.get("branch") ]],userRemoteConfigs: [[credentialsId: 'Axestrack_Gitlab_Creds', url: 'git@gitlab.com:prime-java/inplant-visitor-module.git']]])
 		}
 	}
 
@@ -89,12 +89,12 @@ node{
 
 			if(opType=='restart')
 			{	
-				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${instanceID}/production_restart.sh ${paramsMap.get('serverPort')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('logLevel')} ${instanceID} ${paramsMap.get('logRoot')} ${paramsMap.get('cloudConfigUri')} ${paramsMap.get('cloudConfigUser')} ${paramsMap.get('cloudConfigPassword')} ${paramsMap.get('jmxPort')} ${paramsMap.get('key')} ${paramsMap.get('killTimeout')}"
+				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${instanceID}/production_restart.sh ${paramsMap.get('serverPort')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('logLevel')} ${instanceID} ${paramsMap.get('logRoot')} ${paramsMap.get('cloudConfigUri')} ${paramsMap.get('cloudConfigUser')} ${paramsMap.get('cloudConfigPassword')} ${paramsMap.get('jmxPort')} ${paramsMap.get('killTimeout')}"
 			}
 			else if (opType=='start')
 			{
 
-				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${instanceID}/production_start.sh ${paramsMap.get('serverPort')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('logLevel')} ${instanceID} ${paramsMap.get('logRoot')} ${paramsMap.get('cloudConfigUri')} ${paramsMap.get('cloudConfigUser')} ${paramsMap.get('cloudConfigPassword')} ${paramsMap.get('jmxPort')} ${paramsMap.get('key')}"
+				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/${instanceID}/production_start.sh ${paramsMap.get('serverPort')} ${paramsMap.get('profile')} ${paramsMap.get('sizeOfLogFiles')} ${paramsMap.get('numberOfLogFiles')} ${paramsMap.get('logLevel')} ${instanceID} ${paramsMap.get('logRoot')} ${paramsMap.get('cloudConfigUri')} ${paramsMap.get('cloudConfigUser')} ${paramsMap.get('cloudConfigPassword')} ${paramsMap.get('jmxPort')}"
 
 			}
 			else if(opType=='shutdown')
