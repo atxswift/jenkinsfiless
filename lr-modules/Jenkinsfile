@@ -125,7 +125,7 @@ node{
 
 
 			//todo move the mkdir and ls command to outside the try block. 
-				sshagent(credentials : ['deployjava']) {
+				sshagent(credentials : ['deploy-demo']) {
 
 					//todo add checks for return values here
 					//make directory if it doesnt exist
