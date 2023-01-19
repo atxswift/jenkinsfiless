@@ -1,0 +1,81 @@
+node{
+	//todo - Store port to Device type in map, after all bugs are fixed.
+
+	def remoteHost
+	 def paramsMap=[:]
+
+		def stringParams=['appName','branch','remoteUser','remoteHost','baseDir']
+		def intParams=[]
+	
+
+
+		stage ('Parse Params'){
+
+			echo this.params.toString()
+			echo this.params.getClass().toString()
+
+			stringParams.each {key->
+				val=this.params.get(key)
+				if (val==null)
+					error('Got null value for '+key )
+					paramsMap.put(key,val.trim())
+				}
+
+			intParams.each {key->
+				val=this.params.get(key)
+				if (val==null)
+					error('Got null value for '+key )
+					else if (!val.trim().isInteger())
+					{
+						error('Got non-integer value for '+key + ":"+val.trim() )
+					}
+					paramsMap.put(key,val.trim())
+				}
+
+			
+
+
+		}
+
+
+	stage ('Checkout'){
+	
+			checkout([$class: 'GitSCM',
+					branches: [[name: paramsMap.get("branch")]],
+					userRemoteConfigs: [[credentialsId: 'Axestrack_Gitlab_Creds',
+					url: 'git@gitlab.com:elogist-app-devs/images.git']]])
+		
+	}	
+
+
+
+	stage('SSH transfer and restart') {
+
+                
+
+		remoteUser=paramsMap.get('remoteUser')
+                remoteHost=paramsMap.get('remoteHost')
+		remoteDir=paramsMap.get('baseDir')+'/'+paramsMap.get('appName')
+		sshLsCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} ls -l ${remoteDir}"
+                echo sshLsCommand
+
+		 mkdirCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} mkdir -p ${remoteDir}"
+                 echo mkdirCommand
+
+		 rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\'  --recursive --times --compress --delete --progress . ${remoteUser}@${remoteHost}:${remoteDir}"
+                 echo rsyncCommand
+
+                          sshagent(credentials : ['deployjava']) {
+
+                                sh mkdirCommand
+                                //This is a test command
+                                sh sshLsCommand
+                                //This is the actual copy command
+                                sh rsyncCommand
+                        }
+
+		
+
+	}
+}
+
