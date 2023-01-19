@@ -61,6 +61,7 @@ node{
 		remoteUser=paramsMap.get('remoteUser')
                 remoteHost=paramsMap.get('remoteHost')
 		remoteDir=paramsMap.get('baseDir')+'/'+paramsMap.get('appName')
+        branch=paramsMap.get("branch")
 		sshLsCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} ls -l ${remoteDir}"
                 echo sshLsCommand
 
@@ -69,7 +70,7 @@ node{
 
 		 rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\'  --recursive --times --compress --progress . ${remoteUser}@${remoteHost}:${remoteDir}"
                  echo rsyncCommand
-          gitCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} pushd ${remoteDir}; git checkout master;popd"
+          gitCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} pushd ${remoteDir}; git checkout ${branch};popd"
 
 
                           sshagent(credentials : ['deployjava']) {
