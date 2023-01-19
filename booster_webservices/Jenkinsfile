@@ -69,6 +69,8 @@ node{
 
 		 rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\'  --recursive --times --compress --progress . ${remoteUser}@${remoteHost}:${remoteDir}"
                  echo rsyncCommand
+          gitCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} pushd ${remoteDir}; git checkout master;popd"
+
 
                           sshagent(credentials : ['deployjava']) {
 
