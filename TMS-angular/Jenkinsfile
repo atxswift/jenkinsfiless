@@ -86,7 +86,8 @@ node{
 		 mkdirCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} mkdir -p ${remoteDir}"
                  echo mkdirCommand
 
-		 rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress dist/wa-clone/ ${remoteUser}@${remoteHost}:${remoteDir}"
+		 rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress dist/ ${remoteUser}@${remoteHost}:${remoteDir}"
+
                  echo rsyncCommand
 
                           sshagent(credentials : ['deployjava']) {
