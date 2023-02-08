@@ -99,7 +99,7 @@ node{
                                 sh sshLsCommand
                                 //This is the actual copy command
                                 sh rsyncCommand
-                                sh gitCommand
+                               // sh gitCommand
                         }
 
 		}
