@@ -84,8 +84,8 @@ node{
 			echo mkdirCommand
 			rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress build/libs/ ${remoteUser}@${remoteHost}:${baseDir}/${instanceID}"
 			echo rsyncCommand
-
-
+			touchCommand="ssh -o  StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} touch ${baseDir}/${instanceID}/management-tasks.jar"
+			echo touchCommand
 
 			sshagent(credentials : [paramsMap.get('sshCredentials')]) {
 				//todo add checks for return values here
@@ -97,6 +97,8 @@ node{
 						sh sshLsCommand
 						//This is the actual copy command
 						sh rsyncCommand
+						//Touching to get inotify to pick up change
+						sh touchCommand
 					}
 
 					
