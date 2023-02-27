@@ -83,6 +83,8 @@ node{
 
 			sshLsCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} ls -l "
 			echo sshLsCommand
+            mkdirCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} mkdir -p ${baseDir}"
+            echo mkdirCommand
 
 			rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress kafka/ ${remoteUser}@${remoteHost}:${baseDir}"
 			echo rsyncCommand
@@ -114,7 +116,9 @@ node{
 				//make directory if it doesnt exist
 					if(opType!='shutdown' && paramsMap.get('copyToServer'))
 					{	
+						sh mkdirCommand
 						sh sshLsCommand
+                        
 						//This is the actual copy command
 						sh rsyncCommand
                         sh sshRunCommand
