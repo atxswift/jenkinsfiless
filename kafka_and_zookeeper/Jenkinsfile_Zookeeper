@@ -91,17 +91,17 @@ node{
 
 			if(opType=='restart')
 			{	
-				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/custom/bin/production_restart.sh  ${paramsMap.get('logRoot')} ${paramsMap.get('instanceID')}"
+				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh custom/bin/restart_zk.sh ${paramsMap.get('logRoot')} ${paramsMap.get('instanceID')}"
 			}
 			else if (opType=='start')
 			{
 
-				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/custom/bin/production_start.sh  ${paramsMap.get('logRoot')} ${paramsMap.get('instanceID')}"
+				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh custom/bin/restart_zk.sh  ${paramsMap.get('logRoot')} ${paramsMap.get('instanceID')}"
 
 			}
 			else if(opType=='shutdown')
 			{
-				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/custom/bin/production_shutdown.sh  ${paramsMap.get('logRoot')} ${paramsMap.get('instanceID')}"
+				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh custom/bin/restart_zk.sh  ${paramsMap.get('logRoot')} ${paramsMap.get('instanceID')}"
 			}
 			else{
 				error ('invalid typeOfOperation!')
