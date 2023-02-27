@@ -1,0 +1,138 @@
+node{
+
+	def paramsMap=[:] 
+		def stringParams=['appDirectory','branch','remoteUser','remoteHost','logRoot','logLevel','instanceID','typeOfOperation','sshCredentials','serverString','lanIp']
+		def intParams=['zkPort']
+		def boolParams=['buildNeeded','copyToServer']
+
+		def opType=''
+
+		stage ('Parse Params')
+		{
+			echo this.params.toString()
+				echo this.params.getClass().toString()
+
+				stringParams.each {key->
+					val=this.params.get(key)
+						if (val==null)
+							error('Got null value for '+key )
+								paramsMap.put(key,val.trim())
+
+				}
+
+			intParams.each {key->
+				val=this.params.get(key)
+					if (val==null)
+						error('Got null value for '+key )
+					else if (!val.trim().isInteger())
+					{
+						error('Got non-integer value for '+key + ":"+val.trim() )   
+					}
+				paramsMap.put(key,val.trim())
+
+			}
+
+			boolParams.each {key->
+				val=this.params.get(key)
+					if (val==null)
+						error('Got null value for '+key )
+							paramsMap.put(key,val.toBoolean())
+			}
+
+
+			opType=paramsMap.get('typeOfOperation')
+				echo paramsMap.toString()
+
+		}
+
+	stage ('Checkout'){
+
+		if(paramsMap.get("buildNeeded")&& opType!='shutdown')
+		{
+			checkout([$class: 'GitSCM',branches: [[name: paramsMap.get("branch") ]],userRemoteConfigs: [[credentialsId: 'Axestrack_Gitlab_Creds', url: 'git@gitlab.com:axestrack_devops/kafka_and_zookeeper.git']]])
+		}
+	}
+
+	stage ('Build'){
+		if(paramsMap.get("buildNeeded")&& opType!='shutdown')
+		{		
+			echo "Configuring project..."
+				sh "ls -la ${pwd()}"
+				sh "ls -la ."
+				sh "pwd"
+				instanceID=paramsMap.get('instanceID');
+                
+
+				retVal=sh(returnStatus: true,script:"python3 ./kafka/custom/generate_zookeeper.py -ii ${instanceID} -dd ${paramsMap.get('logRoot')}/${instanceID}/log -li paramsMap.get('lanIp') -zkp paramsMap.get('zkPort') -ss paramsMap.get('serverString')")
+				echo "Build returned ${retVal.toString()}"
+				if (retVal!=0)
+				{
+					error("Configuration failed with return value ${retVal.toString()}") 
+				}	
+			echo "Finished building...."
+		}
+	}
+	stage('SSH transfer and restart') {
+		if(opType!='none')
+		{
+		remoteUser=paramsMap.get('remoteUser')
+			remoteHost=paramsMap.get('remoteHost')
+			baseDir=paramsMap.get('appDirectory')
+			instanceID=paramsMap.get('instanceID');
+
+			sshLsCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} ls -l ${baseDir}/${instanceID}"
+			echo sshLsCommand
+			mkdirCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} mkdir -p ${baseDir}/${instanceID}"
+			echo mkdirCommand
+			rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress kafka/ ${remoteUser}@${remoteHost}:${baseDir}/"
+			echo rsyncCommand
+
+
+
+			if(opType=='restart')
+			{	
+				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/kafka/custom/bin/production_restart.sh  ${paramsMap.get('logRoot')} ${paramsMap.get('instanceID')}"
+			}
+			else if (opType=='start')
+			{
+
+				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/kafka/custom/bin/production_start.sh  ${paramsMap.get('logRoot')} ${paramsMap.get('instanceID')}"
+
+			}
+			else if(opType=='shutdown')
+			{
+				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/kafka/custom/bin/production_shutdown.sh  ${paramsMap.get('logRoot')} ${paramsMap.get('instanceID')}"
+			}
+			else{
+				error ('invalid typeOfOperation!')
+			}
+
+			echo sshRunCommand
+
+			sshagent(credentials : [paramsMap.get('sshCredentials')]) {
+				//todo add checks for return values here
+				//make directory if it doesnt exist
+					if(opType!='shutdown' && paramsMap.get('copyToServer'))
+					{	
+						sh mkdirCommand
+						//This is a test command
+						sh sshLsCommand
+						//This is the actual copy command
+						sh rsyncCommand
+					}
+
+					try{
+						
+						sh sshRunCommand
+					}
+					catch(err)
+					{
+						echo "This is a false alarm, because we're waiting 30 secs to see the logs... We're using this workaround until we figure out how to set timeout for "
+						echo err.getMessage()
+					}
+			}
+		}
+	}
+
+}
+
