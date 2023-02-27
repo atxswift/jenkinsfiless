@@ -1,7 +1,7 @@
 node{
 
 	def paramsMap=[:] 
-		def stringParams=['appDirectory','branch','remoteUser','remoteHost','logRoot','logLevel','instanceID','typeOfOperation','sshCredentials','serverString','lanIp']
+		def stringParams=['appDirectory','branch','remoteUser','remoteHost','logRoot','instanceID','typeOfOperation','sshCredentials','serverString','lanIp']
 		def intParams=['zkPort']
 		def boolParams=['buildNeeded','copyToServer']
 
@@ -80,28 +80,27 @@ node{
 			baseDir=paramsMap.get('appDirectory')
 			instanceID=paramsMap.get('instanceID');
 
-			sshLsCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} ls -l ${baseDir}/${instanceID}"
+			sshLsCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} ls -l "
 			echo sshLsCommand
-			mkdirCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} mkdir -p ${baseDir}/${instanceID}"
-			echo mkdirCommand
-			rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress kafka/ ${remoteUser}@${remoteHost}:${baseDir}/"
+
+			rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress kafka/ ${remoteUser}@${remoteHost}"
 			echo rsyncCommand
 
 
 
 			if(opType=='restart')
 			{	
-				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/kafka/custom/bin/production_restart.sh  ${paramsMap.get('logRoot')} ${paramsMap.get('instanceID')}"
+				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/custom/bin/production_restart.sh  ${paramsMap.get('logRoot')} ${paramsMap.get('instanceID')}"
 			}
 			else if (opType=='start')
 			{
 
-				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/kafka/custom/bin/production_start.sh  ${paramsMap.get('logRoot')} ${paramsMap.get('instanceID')}"
+				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/custom/bin/production_start.sh  ${paramsMap.get('logRoot')} ${paramsMap.get('instanceID')}"
 
 			}
 			else if(opType=='shutdown')
 			{
-				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/kafka/custom/bin/production_shutdown.sh  ${paramsMap.get('logRoot')} ${paramsMap.get('instanceID')}"
+				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/custom/bin/production_shutdown.sh  ${paramsMap.get('logRoot')} ${paramsMap.get('instanceID')}"
 			}
 			else{
 				error ('invalid typeOfOperation!')
