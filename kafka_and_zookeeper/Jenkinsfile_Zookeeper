@@ -114,22 +114,12 @@ node{
 				//make directory if it doesnt exist
 					if(opType!='shutdown' && paramsMap.get('copyToServer'))
 					{	
-						sh mkdirCommand
-						//This is a test command
 						sh sshLsCommand
 						//This is the actual copy command
 						sh rsyncCommand
+                        sh sshRunCommand
 					}
 
-					try{
-						
-						sh sshRunCommand
-					}
-					catch(err)
-					{
-						echo "This is a false alarm, because we're waiting 30 secs to see the logs... We're using this workaround until we figure out how to set timeout for "
-						echo err.getMessage()
-					}
 			}
 		}
 	}
