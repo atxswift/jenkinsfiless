@@ -62,8 +62,9 @@ node{
 				sh "pwd"
 				instanceID=paramsMap.get('instanceID');
                 
-
-				retVal=sh(returnStatus: true,script:"python3 ./kafka/custom/generate_zookeeper.py -ii ${instanceID} -dd ${paramsMap.get('logRoot')}/${instanceID}/log -li paramsMap.get('lanIp') -zkp paramsMap.get('zkPort') -ss paramsMap.get('serverString')")
+                pyScript="python3 ./kafka/custom/generate_zookeeper.py -ii ${instanceID} -dd ${paramsMap.get('logRoot')}/${instanceID}/log -li ${paramsMap.get('lanIp')} -zkp ${paramsMap.get('zkPort')} -ss ${paramsMap.get('serverString')}"
+                echo pyScript
+				retVal=sh(returnStatus: true,script:pyScript)
 				echo "Build returned ${retVal.toString()}"
 				if (retVal!=0)
 				{
