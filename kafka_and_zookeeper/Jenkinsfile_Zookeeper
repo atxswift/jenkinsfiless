@@ -84,7 +84,7 @@ node{
 			sshLsCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} ls -l "
 			echo sshLsCommand
 
-			rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress kafka/ ${remoteUser}@${remoteHost}"
+			rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress kafka/ ${remoteUser}@${remoteHost}:"
 			echo rsyncCommand
 
 
