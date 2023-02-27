@@ -84,24 +84,24 @@ node{
 			sshLsCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} ls -l "
 			echo sshLsCommand
 
-			rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress kafka/ ${remoteUser}@${remoteHost}:"
+			rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress kafka/ ${remoteUser}@${remoteHost}:${baseDir}"
 			echo rsyncCommand
 
 
 
 			if(opType=='restart')
 			{	
-				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh custom/bin/restart_zk.sh ${paramsMap.get('logRoot')} ${paramsMap.get('instanceID')}"
+				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/custom/bin/restart_zk.sh ${paramsMap.get('logRoot')} ${paramsMap.get('instanceID')}"
 			}
 			else if (opType=='start')
 			{
 
-				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh custom/bin/restart_zk.sh  ${paramsMap.get('logRoot')} ${paramsMap.get('instanceID')}"
+				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/custom/bin/restart_zk.sh  ${paramsMap.get('logRoot')} ${paramsMap.get('instanceID')}"
 
 			}
 			else if(opType=='shutdown')
 			{
-				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh custom/bin/restart_zk.sh  ${paramsMap.get('logRoot')} ${paramsMap.get('instanceID')}"
+				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/custom/bin/restart_zk.sh  ${paramsMap.get('logRoot')} ${paramsMap.get('instanceID')}"
 			}
 			else{
 				error ('invalid typeOfOperation!')
