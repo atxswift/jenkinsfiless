@@ -118,11 +118,21 @@ node{
 					{	
 						sh mkdirCommand
 						sh sshLsCommand
-                        
-						//This is the actual copy command
 						sh rsyncCommand
-                        sh sshRunCommand
+                    }
+                        
+
+
+                    try{
+						
+						sh sshRunCommand
 					}
+					catch(err)
+					{
+						echo "Errror starting application"
+						echo err.getMessage()
+					}
+					
 
 			}
 		}
