@@ -3,7 +3,7 @@ node{
 	def paramsMap=[:] 
 		def stringParams=['appDirectory','branch','remoteUser','remoteHost','logRoot','instanceID','typeOfOperation','sshCredentials','serverString','lanIp']
 		def intParams=['zkPort']
-		def boolParams=['buildNeeded','copyToServer']
+		def boolParams=['buildNeeded','copyToServer','delete']
 
 		def opType=''
 
@@ -86,7 +86,12 @@ node{
             mkdirCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} mkdir -p ${baseDir}"
             echo mkdirCommand
 
-			rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress  --progress kafka/ ${remoteUser}@${remoteHost}:${baseDir}"
+			
+
+			if(paramsMap.get("delete"))
+				rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress kafka/ ${remoteUser}@${remoteHost}:${baseDir}"
+			else
+				rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --progress kafka/ ${remoteUser}@${remoteHost}:${baseDir}"
 			echo rsyncCommand
 
 
