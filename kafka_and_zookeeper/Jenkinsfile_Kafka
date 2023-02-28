@@ -61,7 +61,7 @@ node{
 				sh "pwd"
 				instanceID=paramsMap.get('instanceID');
                 
-                pyScript="python3 ./kafka/custom/generate_kafka.py -ii ${instanceID} -li ${paramsMap.get('lanIp')} zkp ${paramsMap.get('kafkaPort')} -zks ${paramsMap.get('zkString')} -p ${paramsMap.get('profile')} -pip ${paramsMap.get('publicIp')} -pp ${paramsMap.get('publicPort')}"
+                pyScript="python3 ./kafka/custom/generate_kafka.py -ii ${instanceID} -li ${paramsMap.get('lanIp')} -kp ${paramsMap.get('kafkaPort')} -zks ${paramsMap.get('zkString')} -p ${paramsMap.get('profile')} -pip ${paramsMap.get('publicIp')} -pp ${paramsMap.get('publicPort')}"
                 echo pyScript
 				retVal=sh(returnStatus: true,script:pyScript)
 				echo "Build returned ${retVal.toString()}"
