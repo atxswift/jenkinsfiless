@@ -1,0 +1,141 @@
+node{
+
+	def paramsMap=[:] 
+		def stringParams=['appDirectory','branch','remoteUser','remoteHost','logRoot','instanceID','typeOfOperation','sshCredentials','zkString','lanIp','profile','publicIp']
+		def intParams=['kafkaPort','publicPort']
+		def boolParams=['buildNeeded','copyToServer']
+		def opType=''
+
+		stage ('Parse Params')
+		{
+			echo this.params.toString()
+				echo this.params.getClass().toString()
+
+				stringParams.each {key->
+					val=this.params.get(key)
+						if (val==null)
+							error('Got null value for '+key )
+								paramsMap.put(key,val.trim())
+
+				}
+
+			intParams.each {key->
+				val=this.params.get(key)
+					if (val==null)
+						error('Got null value for '+key )
+					else if (!val.trim().isInteger())
+					{
+						error('Got non-integer value for '+key + ":"+val.trim() )   
+					}
+				paramsMap.put(key,val.trim())
+
+			}
+
+			boolParams.each {key->
+				val=this.params.get(key)
+					if (val==null)
+						error('Got null value for '+key )
+							paramsMap.put(key,val.toBoolean())
+			}
+
+
+			opType=paramsMap.get('typeOfOperation')
+				echo paramsMap.toString()
+
+		}
+
+	stage ('Checkout'){
+
+		if(paramsMap.get("buildNeeded")&& opType!='shutdown')
+		{
+			checkout([$class: 'GitSCM',branches: [[name: paramsMap.get("branch") ]],userRemoteConfigs: [[credentialsId: 'Axestrack_Gitlab_Creds', url: 'git@gitlab.com:axestrack_devops/kafka_and_zookeeper.git']]])
+		}
+	}
+
+	stage ('Build'){
+		if(paramsMap.get("buildNeeded")&& opType!='shutdown')
+		{		
+			echo "Configuring project..."
+				sh "ls -la ${pwd()}"
+				sh "ls -la ."
+				sh "pwd"
+				instanceID=paramsMap.get('instanceID');
+                
+                pyScript="python3 ./kafka/custom/generate_kafka.py -ii ${instanceID} -li ${paramsMap.get('lanIp')} zkp ${paramsMap.get('kafkaPort')} -zks ${paramsMap.get('zkString')} -p ${paramsMap.get('profile')} -pip ${paramsMap.get('publicIp')} -pp ${paramsMap.get('publicPort')}"
+                echo pyScript
+				retVal=sh(returnStatus: true,script:pyScript)
+				echo "Build returned ${retVal.toString()}"
+				if (retVal!=0)
+				{
+					error("Configuration failed with return value ${retVal.toString()}") 
+				}	
+			echo "Finished building...."
+		}
+	}
+	stage('SSH transfer and restart') {
+		if(opType!='none')
+		{
+		remoteUser=paramsMap.get('remoteUser')
+			remoteHost=paramsMap.get('remoteHost')
+			baseDir=paramsMap.get('appDirectory')
+			instanceID=paramsMap.get('instanceID');
+
+			sshLsCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} ls -l "
+			echo sshLsCommand
+            mkdirCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} mkdir -p ${baseDir}"
+            echo mkdirCommand
+
+			rsyncCommand="rsync -e \'ssh -o StrictHostKeyChecking=no\' --recursive --times --compress --delete --progress kafka/ ${remoteUser}@${remoteHost}:${baseDir}"
+			echo rsyncCommand
+
+
+
+			if(opType=='restart')
+			{	
+				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/custom/bin/restart_kafka.sh ${paramsMap.get('logRoot')} ${paramsMap.get('instanceID')}"
+			}
+			else if (opType=='start')
+			{
+
+				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/custom/bin/start_kafka.sh  ${paramsMap.get('logRoot')} ${paramsMap.get('instanceID')}"
+
+			}
+			else if(opType=='shutdown')
+			{
+				sshRunCommand="ssh -o StrictHostKeyChecking=no   ${remoteUser}@${remoteHost} sh ${baseDir}/custom/bin/stop_kafka.sh  ${paramsMap.get('logRoot')} ${paramsMap.get('instanceID')}"
+			}
+			else{
+				error ('invalid typeOfOperation!')
+			}
+
+			echo sshRunCommand
+
+			sshagent(credentials : [paramsMap.get('sshCredentials')]) {
+				//todo add checks for return values here
+				//make directory if it doesnt exist
+					if(opType!='shutdown' && paramsMap.get('copyToServer'))
+					{	
+						sh mkdirCommand
+						sh sshLsCommand
+						sh rsyncCommand
+                    			}
+                        
+
+
+                    try{
+						
+					sh sshRunCommand
+					}
+					catch(err)
+					{
+						echo "Errror starting application"
+						echo err.getMessage()
+					}
+					
+
+			}
+		}
+	}
+
+}
+
